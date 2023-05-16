@@ -14,6 +14,7 @@ from typing import Any, Dict, List
 
 import requests
 from auth import auth_token
+from module import Module
 from user import User
 
 # Special type to indicate only a 0 or 1 should be passed
@@ -175,15 +176,15 @@ class EdStemAPI:
         return lessons["lessons"]
 
     # Get module info
-    def get_all_modules(self) -> List[Dict[str, Any]]:
-        """Gets all modules for a course. Endpoint: /courses/{course_id}/lessons
+    def get_all_modules(self) -> list[Module]:
+        """Gets all modules for a course. Endpoint: /courses/{}/lessons
 
         Returns:
             A list of JSON objects, one for each module.
         """
         lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
         lessons = self._ed_get_request(lessons_path)
-        return lessons["modules"]
+        return [Module(m) for m in lessons["modules"]]
 
     def get_lesson(self, lesson_id: int) -> Dict[str, Any]:
         """Gets metadata for a single lesson. Endpoint: /lessons/{lesson_id}
