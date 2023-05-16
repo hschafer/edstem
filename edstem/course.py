@@ -1,3 +1,5 @@
+import itertools
+
 from ed_api import EdStemAPI
 from user import User
 
@@ -11,11 +13,11 @@ class EdCourse:
 
     # Users
 
-    def get_users(self) -> list[User]:
+    def get_all_users(self) -> list[User]:
         return self._api.get_users(self.course_id)
 
     def get_user(self, user: int | str) -> User:
-        users = self.get_users()
+        users = self.get_all_users()
         users = [u for u in users
                  if u["id"] == user or
                  u["name"] == user]
@@ -27,4 +29,22 @@ class EdCourse:
 
         return users[0]
 
+    def get_all_tutorials(self) -> list[str]:
+        users = self.get_all_users()
+
+        groups = itertools.groupby(
+            sorted(users, key=lambda x: x["tutorial"] if x["tutorial"] else ""),
+            key=lambda x: x["tutorial"],
+        )
+
+        tutorials = []
+        for k, _ in groups:
+            tutorials.append(k)
+        return tutorials
+
+    def get_tutorial(self, user: int | str) -> str:
+        user = self.get_user()
+        return user["tutorial"]
+
     ## TODO Get analytics users?
+

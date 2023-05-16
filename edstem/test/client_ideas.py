@@ -3,8 +3,8 @@ from edstem import EdCourse, User, Module, Lesson, Slide, QuizQuestion, Challeng
 course = EdCourse(1234)  # TODO Auth?
 
 ## Get users
-users: list[User] = course.get_users()
-user: User = course.get_users(id or name)  # Error if multiple
+users: list[User] = course.get_all_users()
+user: User = course.get_user(id or name)  # Error if multiple
 # How to unify diff user metadata
 users: list[User2] = course.get_analytics_users()
 

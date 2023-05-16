@@ -547,18 +547,6 @@ class EdStemAPI:
         )["users"]
         return users
 
-    def get_all_tutorials(self):
-        users = self.get_all_users()
-        groups = itertools.groupby(
-            sorted(users, key=lambda x: x["tutorial"] if x["tutorial"] else ""),
-            key=lambda x: x["tutorial"],
-        )
-
-        tutorials = []
-        for k, _ in groups:
-            tutorials.append(k)
-        return tutorials
-
     def get_all_submissions(
         self,
         challenge_id: int,
