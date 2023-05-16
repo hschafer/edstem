@@ -1,5 +1,9 @@
 import importlib.metadata
 
-__version__ = importlib.metadata.version("edstem")
+from edstem.course import EdCourse
+from edstem.user import User
 
-from . import api
+from . import (challenge, course, ed_api, lesson, module, quiz_question, slide,
+               user)
+
+# __version__ = importlib.metadata.version("edstem")

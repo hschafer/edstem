@@ -1,31 +1,31 @@
 import itertools
-from typing import Any, Dict, TypeVar
+from typing import Any, Callable, Dict, Optional, TypeVar
 
-from ed_api import EdStemAPI
-from module import Module
-from user import User
+from edstem.ed_api import EdStemAPI
+from edstem.module import Module
+from edstem.user import User
 
 # TODO Typing?
 T = TypeVar("T")
 def _filter_id_or_name(values: list[T], id_or_name: int | str) -> T:
-    filtered = [v for v in values if v["id"] == id_or_name or v["name"] == id_or_name]
+    filtered = [v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name]
     if len(filtered) == 0:
-        raise ValueError("Identifier failed to identify any objects")
+        raise ValueError(f"Identifier failed to identify any objects: {id_or_name}")
     elif len(filtered) > 0:
-        raise ValueError("Identifier identified too many objects")
+        raise ValueError(f"Identifier identified too many objects: {id_or_name} (found {len(filtered)})")
 
     return filtered[0]
 
 
 class EdCourse:
     course_id: int
+    _api: EdStemAPI
 
-    def __init__(self, course_id: int, auth_token_or_file: str):
+    def __init__(self, course_id: int, auth_token_or_file: str, api_constructor: Callable[[str], EdStemAPI] = EdStemAPI):
         self.course_id = course_id
-        self._api = EdStemAPI(auth_token_or_file)
+        self._api = api_constructor(auth_token_or_file)
 
     # Users
-
     def get_all_users(self) -> list[User]:
         return self._api.get_users(self.course_id)
 

@@ -13,9 +13,10 @@ import json
 from typing import Any, Dict, List
 
 import requests
-from auth import auth_token
-from module import Module
-from user import User
+
+from edstem.auth import auth_token
+from edstem.module import Module
+from edstem.user import User
 
 # Special type to indicate only a 0 or 1 should be passed
 BinaryFlag = int
