@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "edstem"
+version = "0.0.1"
+description = "A 3rd-party Python wrapper for the (unofficial) EdStem API. Not maintained by EdStem staff."
+authors = ["Hunter Schafer <hunterschafer@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.30.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
