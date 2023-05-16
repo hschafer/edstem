@@ -1,4 +1,4 @@
-from course import *
+from edstem import EdCourse, User, Module, Lesson, Slide, QuizQuestion, Challenge
 # Getting information about a course
 course = EdCourse(1234)  # TODO Auth?
 
