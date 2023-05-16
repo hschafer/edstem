@@ -8,11 +8,13 @@ Every request requires you authenticate. In order to do this, you will need your
 authentication token from EdStem. You can access your token by looking at network requests
 on EdStem and finding a request with an x-token header.
 """
+import itertools
 import json
 from typing import Any, Dict, List
 
 import requests
-import itertools
+from auth import auth_token
+from user import User
 
 # Special type to indicate only a 0 or 1 should be passed
 BinaryFlag = int
@@ -38,19 +40,18 @@ def urljoin(*parts):
 class EdStemAPI:
     API_URL = f"https://us.edstem.org/api/"
 
-    def __init__(self, course_id: int, token: str):
+    def __init__(self, token_or_file: str):
         """Initializes access to the EdStem API for a course with the given ID.
 
 
         Args:
-            course_id: An integer course ID for the course to access. See EdStem URL.
-            token: Your EdStem authentication token
+            token_or_file: Your EdStem authentication token or a file name (fully qualified) that
+                           contains the token
         """
-        self._course_id = course_id
-        self._token = token
+        self._token = auth_token(token_or_file)
 
     # General functions for GET/POST
-    def _ed_get_request(
+    def _get_request(
         self, url: str, query_params: Dict[str, Any] = {}
     ) -> Dict[str, Any]:
         """Sends a GET request to EdStem.
@@ -71,7 +72,7 @@ class EdStemAPI:
         response.raise_for_status()
         return response.json()
 
-    def _ed_post_request(
+    def _post_request(
         self, url: str, query_params: Dict[str, Any] = {}, json: Dict[str, Any] = {}
     ) -> bytes:
         """Sends a POST request to EdStem.
@@ -96,7 +97,7 @@ class EdStemAPI:
         response.raise_for_status()
         return response.content
 
-    def _ed_put_request(
+    def _put_request(
         self,
         url: str,
         query_params: Dict[str, Any] = {},
@@ -126,7 +127,7 @@ class EdStemAPI:
         response.raise_for_status()
         return response.content
 
-    def _ed_delete_request(
+    def _delete_request(
         self,
         url: str,
         query_params: Dict[str, Any] = {},
@@ -157,10 +158,10 @@ class EdStemAPI:
         return response.content
 
     # Enrollment info
-    def get_users(self):
-        admin_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/admin")
-        admin_info = self._ed_get_request(admin_path)
-        return admin_info["users"]
+    def get_users(self, course_id: int) -> list[User]:
+        admin_path = urljoin(EdStemAPI.API_URL, f"courses/{course_id}/admin")
+        admin_info = self._get_request(admin_path)
+        return [User(user) for user in admin_info["users"]]
 
     # Get lesson info
     def get_all_lessons(self) -> List[Dict[str, Any]]:
