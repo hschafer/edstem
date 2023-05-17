@@ -21,9 +21,9 @@ class EdCourse:
     course_id: int
     _api: EdStemAPI
 
-    def __init__(self, course_id: int, auth_token_or_file: str, api_constructor: Callable[[str], EdStemAPI] = EdStemAPI):
+    def __init__(self, course_id: int, auth_token_or_file: str): #, api_constructor: Optional[Callable[[str], EdStemAPI]] = None):
         self.course_id = course_id
-        self._api = api_constructor(auth_token_or_file)
+        self._api = EdStemAPI(auth_token_or_file)
 
     # Users
     def get_all_users(self) -> list[User]:
