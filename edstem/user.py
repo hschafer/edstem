@@ -34,3 +34,24 @@ class User(EdObject[UserID]):
 
     def get_tutorial(self) -> str:
         return self.tutorial
+
+    def set_tutorail(self, tutorial: str) -> None:
+        self.tutorial = tutorial
+
+    def get_role(self) -> str:
+        return self.role
+
+    def set_role(self, role) -> None:
+        self.role = role
+
+    def get_accepted(self) -> bool:
+        return self.accepted
+
+    def get_source_id(self) -> str:
+        return self.source_id
+
+    def get_extra_props(self, key=None) -> Any:
+        if key is None:
+            return self.extra_props
+        else:
+            return self.extra_props[key]
