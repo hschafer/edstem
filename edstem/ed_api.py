@@ -15,8 +15,6 @@ from typing import Any, Dict, List
 import requests
 
 from edstem.auth import AUTH_TOKEN
-from edstem.module import Module
-from edstem.user import User
 
 # Special type to indicate only a 0 or 1 should be passed
 BinaryFlag = int
@@ -158,10 +156,10 @@ class EdStemAPI:
         return response.content
 
     # Enrollment info
-    def get_users(self, course_id: int) -> list[User]:
+    def get_users(self, course_id: int) -> list[dict[str, Any]]:
         admin_path = urljoin(EdStemAPI.API_URL, f"courses/{course_id}/admin")
         admin_info = self._get_request(admin_path)
-        return [User(user) for user in admin_info["users"]]
+        return admin_info["users"]
 
     # Get lesson info
     def get_all_lessons(self) -> List[Dict[str, Any]]:
@@ -175,7 +173,7 @@ class EdStemAPI:
         return lessons["lessons"]
 
     # Get module info
-    def get_all_modules(self) -> list[Module]:
+    def get_all_modules(self) -> list[dict[str, Any]]:
         """Gets all modules for a course. Endpoint: /courses/{}/lessons
 
         Returns:
@@ -183,7 +181,7 @@ class EdStemAPI:
         """
         lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
         lessons = self._ed_get_request(lessons_path)
-        return [Module(m) for m in lessons["modules"]]
+        return lessons["modules"]
 
     def get_lesson(self, lesson_id: int) -> Dict[str, Any]:
         """Gets metadata for a single lesson. Endpoint: /lessons/{lesson_id}
