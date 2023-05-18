@@ -20,13 +20,12 @@ class User(EdObject[UserID]):
         **kwargs
     ) -> None:
         # Currently left out: username, lab_id, lti_synced
-        super().__init__(name, id)
+        super().__init__(name, id, **kwargs)
         self.email = email
         self.role = role
         self.tutorial = tutorial
         self.accepted = accepted
         self.source_id = source_id
-        self.extra_props = kwargs
 
     @staticmethod
     def from_dict(data: JSON) -> "User":
@@ -49,9 +48,3 @@ class User(EdObject[UserID]):
 
     def get_source_id(self) -> str:
         return self.source_id
-
-    def get_extra_props(self, key=None) -> Any:
-        if key is None:
-            return self.extra_props
-        else:
-            return self.extra_props[key]

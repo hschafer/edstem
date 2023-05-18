@@ -19,10 +19,13 @@ IdType = TypeVar("IdType", bound=EdID)
 class EdObject(Generic[IdType]):
     name: str
     id: IdType
+    extra_props: JSON
+    _api: EdStemAPI
 
-    def __init__(self, name: str, id: IdType):
+    def __init__(self, name: str, id: IdType, **kwargs):
         self.name = name
         self.id = id
+        self.extra_props = kwargs
         self._api = EdStemAPI()
 
     def get_name(self) -> str:
@@ -30,6 +33,12 @@ class EdObject(Generic[IdType]):
 
     def get_id(self) -> IdType:
         return self.id
+
+    def get_extra_props(self, key=None) -> JSON | Any:
+        if key is None:
+            return self.extra_props
+        else:
+            return self.extra_props[key]
 
     @staticmethod
     def from_dict(d: JSON) -> "EdObject":
