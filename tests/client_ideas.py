@@ -70,7 +70,7 @@ lesson.challenge_completions(params) # Unsure if possible
 
 ## Quiz Results
 lesson.quiz_completions(id or name?, params)
-lesson.quiz_completions(params)) # Unsure if possible
+lesson.quiz_completions(params) # Unsure if possible
 
 # TBD
 ## Post Grades
