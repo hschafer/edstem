@@ -244,3 +244,21 @@ class TestCourse(unittest.TestCase):
         self.assertEqual(
             set(lessons), set(Lesson.from_dict(l) for l in TEST_LESSON_JSON)
         )
+
+    def test_get_lesson(self):
+        # By ID
+        self.assertEqual(
+            self.course.get_lesson(60007), Lesson.from_dict(TEST_LESSON_0_JSON)
+        )
+        # By name
+        self.assertEqual(
+            self.course.get_lesson("Example Lesson"),
+            Lesson.from_dict(TEST_LESSON_1_JSON),
+        )
+
+        # Name not found
+        with self.assertRaises(ValueError):
+            self.course.get_lesson("Not a lesson")
+        # ID not found
+        with self.assertRaises(ValueError):
+            self.course.get_lesson(3)

@@ -81,7 +81,7 @@ class Lesson(EdObject[LessonID]):
         scheduled_settings: Optional[ScheduledSettings] = None,
         quiz_settings: Optional[QuizSettings] = None,
         timezone: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         # Currently left out: updated_at (assumed always null?), state, status
         super().__init__(name, id, **kwargs)
@@ -243,3 +243,6 @@ class Lesson(EdObject[LessonID]):
             self.name,
             self.id,
         )
+
+    def __repr__(self) -> str:
+        return f"Lesson(id={self.id}, name={self.name})"

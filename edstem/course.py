@@ -72,3 +72,7 @@ class EdCourse(EdObject[CourseID]):
     def get_all_lessons(self) -> list[Lesson]:
         lessons = self._api.get_all_lessons()
         return [Lesson.from_dict(l) for l in lessons]
+
+    def get_lesson(self, id_or_name: LessonID | str) -> Lesson:
+        lessons = self.get_all_lessons()
+        return _filter_single_id_or_name(lessons, id_or_name)
