@@ -1,4 +1,7 @@
-from typing import Any, Generic, NewType, TypeVar
+from datetime import datetime
+from typing import Any, Generic, NewType, Optional, TypeVar
+
+from pandas import to_datetime
 
 from edstem.ed_api import EdStemAPI
 
@@ -31,6 +34,18 @@ class EdObject(Generic[IdType]):
     @staticmethod
     def from_dict(d: JSON) -> "EdObject":
         raise NotImplemented
+
+    @staticmethod
+    def str_to_datetime(timestamp: str, timezone: Optional[str] = None) -> datetime:
+        result = to_datetime(timestamp)
+        if timezone:
+            if result.tz:
+                result = result.tz_localize(timezone)
+            else:
+                result = result.tz_convert(timezone)
+        return result
+
+    # TODO need to go back to Ed String format?
 
     def get_name(self) -> str:
         return self.name

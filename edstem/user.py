@@ -33,6 +33,8 @@ class User(EdObject[UserID]):
     def from_dict(data: JSON) -> "User":
         return User(**data)
 
+    # TODO Set name, email, role?
+
     def get_tutorial(self) -> Optional[str]:
         return self.tutorial
 

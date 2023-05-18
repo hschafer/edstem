@@ -52,16 +52,16 @@ class EdCourse(EdObject[CourseID]):
 
         return set(get_default(u) for u in users)
 
-    def get_tutorial(self, user_identifier: UserID | str) -> Optional[str]:
-        user = self.get_user(user_identifier)
+    def get_tutorial(self, id_or_name: UserID | str) -> Optional[str]:
+        user = self.get_user(id_or_name)
         return user.get_tutorial()
 
     ## TODO Get analytics users?
 
     # Modules
     def get_all_modules(self) -> list[Module]:
-        return self._api.get_all_modules()
+        return [Module.from_dict(m) for m in self._api.get_all_modules()]
 
-    def get_module(self, module: ModuleID | str) -> Module:
+    def get_module(self, id_or_name: ModuleID | str) -> Module:
         modules = self.get_all_modules()
-        return _filter_id_or_name(modules, module)
+        return _filter_id_or_name(modules, id_or_name)
