@@ -104,7 +104,12 @@ class TestCourse(unittest.TestCase):
             User.from_dict(TEST_USER_ARCHIE_JSON),
         )
 
-        # TODO add exception test
+        # Name not found
+        with self.assertRaises(ValueError):
+            self.course.get_user("Not a user")
+        # ID not found
+        with self.assertRaises(ValueError):
+            self.course.get_user(3)
 
     def test_get_all_modules(self):
         modules = self.course.get_all_modules()
@@ -122,3 +127,10 @@ class TestCourse(unittest.TestCase):
             self.course.get_module("Second Module"),
             Module.from_dict(TEST_MODULE_1_JSON),
         )
+
+        # Name not found
+        with self.assertRaises(ValueError):
+            self.course.get_module("Not a module")
+        # ID not found
+        with self.assertRaises(ValueError):
+            self.course.get_module(3)
