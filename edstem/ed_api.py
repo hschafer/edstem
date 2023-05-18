@@ -10,7 +10,7 @@ on EdStem and finding a request with an x-token header.
 """
 import itertools
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -41,12 +41,14 @@ class EdStemAPI:
     API_URL = f"https://us.edstem.org/api/"
 
     def __init__(self):
-        """Initializes access to the EdStem API.
-        """
+        """Initializes access to the EdStem API."""
         if AUTH_TOKEN is None:
-            raise ValueError("Must specify auth token before using Ed API. Refer to edstem.auth.set_token(...)")
+            raise ValueError(
+                "Must specify auth token before using Ed API. Refer to edstem.auth.set_token(...)"
+            )
 
         self._token = AUTH_TOKEN
+        self._course_id = None  # TODO fix methods that rely on this
 
     # General functions for GET/POST
     def _get_request(
@@ -169,7 +171,7 @@ class EdStemAPI:
             A list of JSON objects, one for each lesson.
         """
         lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
-        lessons = self._ed_get_request(lessons_path)
+        lessons = self._get_request(lessons_path)
         return lessons["lessons"]
 
     # Get module info
@@ -180,7 +182,7 @@ class EdStemAPI:
             A list of JSON objects, one for each module.
         """
         lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
-        lessons = self._ed_get_request(lessons_path)
+        lessons = self._get_request(lessons_path)
         return lessons["modules"]
 
     def get_lesson(self, lesson_id: int) -> Dict[str, Any]:
@@ -193,7 +195,7 @@ class EdStemAPI:
             A JSON object with the specified lesson's metadata
         """
         lesson_path = urljoin(EdStemAPI.API_URL, "lessons", lesson_id)
-        lesson = self._ed_get_request(lesson_path)["lesson"]
+        lesson = self._get_request(lesson_path)["lesson"]
         return lesson
 
     def get_slide(self, slide_id: int) -> Dict[str, Any]:
@@ -206,11 +208,11 @@ class EdStemAPI:
             A JSON object with the specified slide's metadata
         """
         slide_path = urljoin(EdStemAPI.API_URL, "lessons", "slides", slide_id)
-        slide = self._ed_get_request(slide_path)["slide"]
+        slide = self._get_request(slide_path)["slide"]
         return slide
 
     def create_lesson(
-        self, title: str = None, options: Dict[str, Any] = {}
+        self, title: Optional[str] = None, options: Dict[str, Any] = {}
     ) -> Dict[str, Any]:
         """Creates a new Ed lesson. Endpoint: /courses/{course_id}/lessons
 
@@ -223,7 +225,7 @@ class EdStemAPI:
         """
         lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
         lesson_dict = {"lesson": ({"title": title} | options)}
-        lesson = json.loads(self._ed_post_request(lessons_path, json=lesson_dict))[
+        lesson = json.loads(self._post_request(lessons_path, json=lesson_dict))[
             "lesson"
         ]
         return lesson
@@ -243,9 +245,7 @@ class EdStemAPI:
         lesson = self.get_lesson(lesson_id)
         lesson_path = urljoin(EdStemAPI.API_URL, f"lessons/{lesson_id}")
         lesson_dict = {"lesson": lesson | options}
-        lesson = json.loads(self._ed_put_request(lesson_path, json=lesson_dict))[
-            "lesson"
-        ]
+        lesson = json.loads(self._put_request(lesson_path, json=lesson_dict))["lesson"]
         return lesson
 
     def clone_slide(
@@ -266,7 +266,7 @@ class EdStemAPI:
 
         clone_path = urljoin(EdStemAPI.API_URL, f"lessons/slides/{slide_id}/clone")
         payload = {"lesson_id": lesson_id, "is_hidden": is_hidden}
-        slide = json.loads(self._ed_post_request(clone_path, json=payload))["slide"]
+        slide = json.loads(self._post_request(clone_path, json=payload))["slide"]
         return slide
 
     def edit_slide(self, slide_id: int, options: Dict[str, Any] = {}) -> Dict[str, Any]:
@@ -283,7 +283,7 @@ class EdStemAPI:
         slide_path = urljoin(EdStemAPI.API_URL, f"lessons/slides/{slide_id}")
         slide_dict = slide | options
         slide = json.loads(
-            self._ed_put_request(slide_path, data={"slide": json.dumps(slide_dict)})
+            self._put_request(slide_path, data={"slide": json.dumps(slide_dict)})
         )["slide"]
         return slide
 
@@ -299,7 +299,7 @@ class EdStemAPI:
         questions_path = urljoin(
             EdStemAPI.API_URL, "lessons", "slides", slide_id, "questions"
         )
-        questions = self._ed_get_request(questions_path)["questions"]
+        questions = self._get_request(questions_path)["questions"]
         return questions
 
     def edit_question(
@@ -324,7 +324,7 @@ class EdStemAPI:
         if "question" not in question_data:
             question_data = {"question": question_data}
 
-        response = self._ed_put_request(update_question_path, json=question_data)
+        response = self._put_request(update_question_path, json=question_data)
         return json.loads(response)["question"]
 
     def delete_question(self, question_id: int) -> None:
@@ -339,7 +339,7 @@ class EdStemAPI:
         delete_path = urljoin(
             EdStemAPI.API_URL, "lessons", "slides", "questions", question_id
         )
-        self._ed_delete_request(delete_path)
+        self._delete_request(delete_path)
 
     # Methods for getting information about lesson/assignment completion
     def get_lesson_completions(
@@ -381,7 +381,7 @@ class EdStemAPI:
         lesson_completion_path = urljoin(
             EdStemAPI.API_URL, "lessons", lesson_id, "results.csv"
         )
-        result = self._ed_post_request(
+        result = self._post_request(
             lesson_completion_path,
             {
                 "numbers": numbers,
@@ -436,7 +436,7 @@ class EdStemAPI:
         challenge_path = urljoin(
             EdStemAPI.API_URL, "challenges", challenge_id, "results"
         )
-        result = self._ed_post_request(
+        result = self._post_request(
             challenge_path,
             {
                 "students": students,
@@ -474,7 +474,7 @@ class EdStemAPI:
         quiz_path = urljoin(
             EdStemAPI.API_URL, "lessons/slides", quiz_id, "questions/results"
         )
-        result = self._ed_post_request(
+        result = self._post_request(
             quiz_path,
             {
                 "students": students,
@@ -515,32 +515,32 @@ class EdStemAPI:
                 "content": comment,
             }
         }
-        return self._ed_put_request(path, json=data)
+        return self._put_request(path, json=data)
 
     def connect_user_to_workspace(self, challenge_id, user_id):
         connect_path = urljoin(EdStemAPI.API_URL, "challenges", challenge_id, "connect")
-        self._ed_post_request(connect_path, json={"user_id": user_id})
+        self._post_request(connect_path, json={"user_id": user_id})
 
     def submit_all_challenge(self, challenge_id):
         submit_path = urljoin(
             EdStemAPI.API_URL, "challenges", challenge_id, "submit_all"
         )
-        self._ed_post_request(submit_path)
+        self._post_request(submit_path)
 
     def submit_all_quiz(self, slide_id):
         submit_path = urljoin(
             EdStemAPI.API_URL, "lessons", "slides", slide_id, "questions", "submit_all"
         )
-        self._ed_post_request(submit_path)
+        self._post_request(submit_path)
 
     def get_all_users_for_challenge(self, challenge_id):
         users_path = urljoin(EdStemAPI.API_URL, "challenges", challenge_id, "users")
 
-        result = self._ed_get_request(users_path)["users"]
+        result = self._get_request(users_path)["users"]
         return result
 
     def get_all_users(self):
-        users = self._ed_get_request(
+        users = self._get_request(
             urljoin(EdStemAPI.API_URL, "courses", self._course_id, "analytics", "users")
         )["users"]
         return users
@@ -552,12 +552,11 @@ class EdStemAPI:
         type: str = "optimised",
         tz: str = "America/Los_Angeles",
     ):
-
         # TODO also add ability to specify before date
         submission_path = urljoin(
             EdStemAPI.API_URL, "challenges", challenge_id, "submissions"
         )
-        result = self._ed_post_request(
+        result = self._post_request(
             submission_path,
             query_params={"studuents": students, "type": type, "tz": tz},
         )
@@ -577,9 +576,9 @@ class EdStemAPI:
             "submissions",
         )
 
-        result = self._ed_get_request(submission_path)["submissions"]
+        result = self._get_request(submission_path)["submissions"]
         return result
 
     def delete_submission(self, sub_id):
         delete_path = urljoin(EdStemAPI.API_URL, "challenges", "submissions", sub_id)
-        return self._ed_delete_request(delete_path)
+        return self._delete_request(delete_path)
