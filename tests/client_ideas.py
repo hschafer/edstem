@@ -5,8 +5,8 @@ course = EdCourse(1234)  # TODO Auth?
 ## Get users
 users: list[User] = course.get_all_users()
 user: User = course.get_user(id or name)  # Error if multiple
-# How to unify diff user metadata
-users: list[User2] = course.get_analytics_users()
+# How to unify diff user metadata? Merge in the first call?
+# users: list[User2] = course.get_analytics_users()
 
 ## Get Sections
 tutorials: list[str] = course.get_all_tutorials()
