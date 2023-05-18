@@ -3,6 +3,7 @@ from typing import Any, Optional, TypeVar
 
 from edstem._base import *
 from edstem.ed_api import EdStemAPI
+from edstem.lesson import Lesson
 from edstem.module import Module
 from edstem.user import User
 
@@ -66,3 +67,8 @@ class EdCourse(EdObject[CourseID]):
     def get_module(self, id_or_name: ModuleID | str) -> Module:
         modules = self.get_all_modules()
         return _filter_single_id_or_name(modules, id_or_name)
+
+    # Lessons
+    def get_all_lessons(self) -> list[Lesson]:
+        lessons = self._api.get_all_lessons()
+        return [Lesson.from_dict(l) for l in lessons]

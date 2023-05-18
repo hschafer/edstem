@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import edstem.auth
-from edstem import EdCourse, Module, User
+from edstem import EdCourse, Lesson, Module, User
 from edstem._base import *
 from edstem.ed_api import EdStemAPI
 
@@ -64,11 +64,108 @@ TEST_MODULE_1_JSON = {
 }
 TEST_MODULE_JSON = [TEST_MODULE_0_JSON, TEST_MODULE_1_JSON]
 
+TEST_LESSON_0_JSON: JSON = {
+    "attempted_at": None,
+    "available_at": "2023-05-18T08:00:00+10:00",
+    "course_id": 38139,
+    "created_at": "2023-03-29T11:04:36.691113+11:00",
+    "due_at": "2023-05-19T08:00:00+10:00",
+    "first_viewed_at": "2023-04-25T11:23:16.108332+10:00",
+    "id": 60007,
+    "index": None,
+    "is_hidden": True,
+    "is_timed": False,
+    "is_unlisted": False,
+    "last_viewed_slide_id": 335934,
+    "late_submissions": True,
+    "locked_at": "2023-05-19T08:00:00+10:00",
+    "module_id": None,
+    "number": -1,
+    "openable": False,
+    "original_id": None,
+    "outline": "",
+    "password": "",
+    "prerequisites": [],
+    "release_challenge_feedback": False,
+    "release_challenge_feedback_while_active": False,
+    "release_challenge_solutions": False,
+    "release_challenge_solutions_while_active": False,
+    "release_quiz_correctness_only": False,
+    "release_quiz_solutions": False,
+    "reopen_submissions": False,
+    "settings": {
+        "quiz_question_number_style": "",
+        "quiz_mode": "multiple-attempts",
+        "quiz_active_status": "active",
+    },
+    "slide_count": 9,
+    "solutions_at": "2023-05-19T08:00:00+10:00",
+    "state": "scheduled",
+    "status": "unattempted",
+    "timer_duration": 60,
+    "timer_effective_duration": 60,
+    "timer_expiration_access": False,
+    "title": "Example Assignment",
+    "tutorial_regex": "",
+    "type": "general",
+    "updated_at": None,
+    "user_id": 369,
+}
+TEST_LESSON_1_JSON: JSON = {
+    "attempted_at": None,
+    "available_at": None,
+    "course_id": 38139,
+    "created_at": "2023-05-05T05:51:36.969591+10:00",
+    "due_at": None,
+    "first_viewed_at": None,
+    "id": 62178,
+    "index": None,
+    "is_hidden": True,
+    "is_timed": False,
+    "is_unlisted": False,
+    "last_viewed_slide_id": None,
+    "late_submissions": True,
+    "locked_at": None,
+    "module_id": None,
+    "number": -1,
+    "openable": False,
+    "original_id": None,
+    "outline": "",
+    "password": "",
+    "prerequisites": [],
+    "release_challenge_feedback": False,
+    "release_challenge_feedback_while_active": False,
+    "release_challenge_solutions": False,
+    "release_challenge_solutions_while_active": False,
+    "release_quiz_correctness_only": False,
+    "release_quiz_solutions": False,
+    "reopen_submissions": False,
+    "settings": {
+        "quiz_question_number_style": "",
+        "quiz_mode": "multiple-attempts",
+        "quiz_active_status": "active",
+    },
+    "slide_count": 0,
+    "solutions_at": None,
+    "state": "active",
+    "status": "unattempted",
+    "timer_duration": 60,
+    "timer_effective_duration": 60,
+    "timer_expiration_access": False,
+    "title": "Example Lesson",
+    "tutorial_regex": "",
+    "type": "general",
+    "updated_at": None,
+    "user_id": 65209,
+}
+TEST_LESSON_JSON = [TEST_LESSON_0_JSON, TEST_LESSON_1_JSON]
+
 
 def MockAPI():
     mock_api = MagicMock(spec=EdStemAPI)
     mock_api().get_users.return_value = TEST_USER_JSON
     mock_api().get_all_modules.return_value = TEST_MODULE_JSON
+    mock_api().get_all_lessons.return_value = TEST_LESSON_JSON
     return mock_api
 
 
@@ -77,7 +174,13 @@ class TestCourse(unittest.TestCase):
         # sedstem.auth.set_token("Fake Token")
 
         self.mock_patchers = {}
-        modules_to_patch = ["_base", "course", "user", "module"]
+        modules_to_patch = [
+            "_base",
+            "course",
+            "lesson",
+            "module",
+            "user",
+        ]
         for to_patch in modules_to_patch:
             patcher = patch(f"edstem.{to_patch}.EdStemAPI", MockAPI())
             self.mock_patchers[to_patch] = patcher
@@ -134,3 +237,10 @@ class TestCourse(unittest.TestCase):
         # ID not found
         with self.assertRaises(ValueError):
             self.course.get_module(3)
+
+    def test_get_all_lessons(self):
+        lessons = self.course.get_all_lessons()
+        print(lessons)
+        self.assertEqual(
+            set(lessons), set(Lesson.from_dict(l) for l in TEST_LESSON_JSON)
+        )
