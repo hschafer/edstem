@@ -7,16 +7,16 @@ from edstem.ed_api import EdStemAPI
 
 # Types
 EdID = NewType("EdID", int)
-CourseID = NewType("CourseID", EdID)
-UserID = NewType("UserID", EdID)
-ModuleID = NewType("ModuleID", EdID)
-LessonID = NewType("LessonID", EdID)
+CourseID = NewType("CourseID", int)
+UserID = NewType("UserID", int)
+ModuleID = NewType("ModuleID", int)
+LessonID = NewType("LessonID", int)
 
 JSON = dict[str, Any]
 
 # Discussion? Slide? Quiz Question? Challenge?
 
-IdType = TypeVar("IdType", bound=EdID)
+IdType = TypeVar("IdType", bound=int)
 
 
 class EdObject(Generic[IdType]):

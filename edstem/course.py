@@ -6,14 +6,15 @@ from edstem.ed_api import EdStemAPI
 from edstem.module import Module
 from edstem.user import User
 
-T = TypeVar("T", bound=EdObject)
+I = TypeVar("I", bound=int)
+V = TypeVar("V", bound=EdObject)
 
 
-def _filter_id_or_name(values: list[T], id_or_name: EdID | str) -> list[T]:
+def _filter_id_or_name(values: list[V], id_or_name: I | str) -> list[V]:
     return [v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name]
 
 
-def _filter_single_id_or_name(values: list[T], id_or_name: EdID | str) -> T:
+def _filter_single_id_or_name(values: list[V], id_or_name: I | str) -> V:
     filtered = _filter_id_or_name(values, id_or_name)
     if len(filtered) == 0:
         raise ValueError(f"Identifier failed to identify any objects: {id_or_name}")
@@ -64,4 +65,4 @@ class EdCourse(EdObject[CourseID]):
 
     def get_module(self, id_or_name: ModuleID | str) -> Module:
         modules = self.get_all_modules()
-        return _filter_id_or_name(modules, id_or_name)
+        return _filter_single_id_or_name(modules, id_or_name)
