@@ -1,10 +1,12 @@
+from typing import Optional
+
 from edstem._base import *
 
 
 class User(EdObject[UserID]):
     email: str
     role: str
-    tutorial: str
+    tutorial: Optional[str]
     accepted: bool
     source_id: str
 
@@ -12,9 +14,9 @@ class User(EdObject[UserID]):
         self,
         name: str,
         id: UserID,
-        email: str = "",
-        role: str = "",
-        tutorial: str = "",
+        email: str,
+        role: str,
+        tutorial: Optional[str] = None,
         accepted: bool = False,
         source_id: str = "",
         **kwargs
@@ -31,7 +33,7 @@ class User(EdObject[UserID]):
     def from_dict(data: JSON) -> "User":
         return User(**data)
 
-    def get_tutorial(self) -> str:
+    def get_tutorial(self) -> Optional[str]:
         return self.tutorial
 
     def set_tutorail(self, tutorial: str) -> None:
@@ -48,3 +50,14 @@ class User(EdObject[UserID]):
 
     def get_source_id(self) -> str:
         return self.source_id
+
+    def _tuple(self) -> tuple:
+        return (
+            self.name,
+            self.id,
+            self.email,
+            self.role,
+            self.tutorial,
+            self.accepted,
+            self.source_id,
+        )

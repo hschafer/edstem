@@ -6,21 +6,21 @@ from edstem.ed_api import EdStemAPI
 from edstem.module import Module
 from edstem.user import User
 
-# TODO Typing?
 T = TypeVar("T", bound=EdObject)
 
 
-def _filter_id_or_name(values: list[T], id_or_name: int | str) -> T:
-    filtered = [
-        v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name
-    ]
+def _filter_id_or_name(values: list[T], id_or_name: EdID | str) -> list[T]:
+    return [v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name]
+
+
+def _filter_single_id_or_name(values: list[T], id_or_name: EdID | str) -> T:
+    filtered = _filter_id_or_name(values, id_or_name)
     if len(filtered) == 0:
         raise ValueError(f"Identifier failed to identify any objects: {id_or_name}")
-    elif len(filtered) > 0:
+    elif len(filtered) > 1:
         raise ValueError(
             f"Identifier identified too many objects: {id_or_name} (found {len(filtered)})"
         )
-
     return filtered[0]
 
 
@@ -40,22 +40,19 @@ class EdCourse(EdObject[CourseID]):
 
     def get_user(self, user: UserID | str) -> User:
         users = self.get_all_users()
-        return _filter_id_or_name(users, user)
+        return _filter_single_id_or_name(users, user)
 
-    def get_all_tutorials(self) -> list[str]:
+    def get_all_tutorials(self) -> set[str]:
         users = self.get_all_users()
 
-        groups = itertools.groupby(
-            sorted(users, key=lambda x: x.get_tutorial()),
-            key=lambda x: x.get_tutorial(),
-        )
+        # Annoying but helpful for typing
+        def get_default(u: User) -> str:
+            tutorial = u.get_tutorial()
+            return "" if tutorial is None else tutorial
 
-        tutorials = []
-        for k, _ in groups:
-            tutorials.append(k)
-        return tutorials
+        return set(get_default(u) for u in users)
 
-    def get_tutorial(self, user_identifier: UserID | str) -> str:
+    def get_tutorial(self, user_identifier: UserID | str) -> Optional[str]:
         user = self.get_user(user_identifier)
         return user.get_tutorial()
 

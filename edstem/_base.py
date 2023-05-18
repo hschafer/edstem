@@ -28,6 +28,10 @@ class EdObject(Generic[IdType]):
         self.extra_props = kwargs
         self._api = EdStemAPI()
 
+    @staticmethod
+    def from_dict(d: JSON) -> "EdObject":
+        raise NotImplemented
+
     def get_name(self) -> str:
         return self.name
 
@@ -40,6 +44,14 @@ class EdObject(Generic[IdType]):
         else:
             return self.extra_props[key]
 
-    @staticmethod
-    def from_dict(d: JSON) -> "EdObject":
-        raise NotImplemented
+    def _tuple(self) -> tuple:
+        raise NotImplementedError
+
+    def __eq__(self, other: Any) -> bool:
+        if self.__class__ == other.__class__:
+            return self._tuple() == other._tuple()
+        else:
+            raise NotImplementedError
+
+    def __hash__(self) -> int:
+        return hash(self._tuple())
