@@ -14,7 +14,7 @@ from typing import Any, Dict, List
 
 import requests
 
-from edstem.auth import auth_token
+from edstem.auth import AUTH_TOKEN
 from edstem.module import Module
 from edstem.user import User
 
@@ -42,15 +42,13 @@ def urljoin(*parts):
 class EdStemAPI:
     API_URL = f"https://us.edstem.org/api/"
 
-    def __init__(self, token_or_file: str):
-        """Initializes access to the EdStem API for a course with the given ID.
-
-
-        Args:
-            token_or_file: Your EdStem authentication token or a file name (fully qualified) that
-                           contains the token
+    def __init__(self):
+        """Initializes access to the EdStem API.
         """
-        self._token = auth_token(token_or_file)
+        if AUTH_TOKEN is None:
+            raise ValueError("Must specify auth token before using Ed API. Refer to edstem.auth.set_token(...)")
+
+        self._token = AUTH_TOKEN
 
     # General functions for GET/POST
     def _get_request(

@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+import edstem.auth
 from edstem import EdCourse, User
 from edstem.ed_api import EdStemAPI
 
@@ -12,6 +13,8 @@ def MockAPI():
 
 class TestCourse(unittest.TestCase):
     def setUp(self) -> None:
+        edstem.auth.set_token("Fake Token")
+
         self.mock_api_patcher = patch("edstem.course.EdStemAPI", MockAPI())
         self.mock_api_patcher.start()
 
@@ -19,6 +22,6 @@ class TestCourse(unittest.TestCase):
         self.mock_api_patcher.stop()
 
     def test_get_all_users(self):
-        course = EdCourse(1234, "fake_token")
+        course = EdCourse(1234)
         users = course.get_all_users()
         self.assertEqual(users, [])

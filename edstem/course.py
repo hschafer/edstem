@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 from edstem.ed_api import EdStemAPI
 from edstem.module import Module
@@ -21,9 +21,9 @@ class EdCourse:
     course_id: int
     _api: EdStemAPI
 
-    def __init__(self, course_id: int, auth_token_or_file: str): #, api_constructor: Optional[Callable[[str], EdStemAPI]] = None):
+    def __init__(self, course_id: int): #, api_constructor: Optional[Callable[[str], EdStemAPI]] = None):
         self.course_id = course_id
-        self._api = EdStemAPI(auth_token_or_file)
+        self._api = EdStemAPI()
 
     # Users
     def get_all_users(self) -> list[User]:
