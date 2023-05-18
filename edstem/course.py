@@ -1,12 +1,13 @@
 import itertools
 from typing import Any, Optional, TypeVar
 
+from edstem._base import *
 from edstem.ed_api import EdStemAPI
 from edstem.module import Module
 from edstem.user import User
 
 # TODO Typing?
-T = TypeVar("T")
+T = TypeVar("T", bound=EdObject)
 def _filter_id_or_name(values: list[T], id_or_name: int | str) -> T:
     filtered = [v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name]
     if len(filtered) == 0:
@@ -17,11 +18,11 @@ def _filter_id_or_name(values: list[T], id_or_name: int | str) -> T:
     return filtered[0]
 
 
-class EdCourse:
+class EdCourse(EdObject[CourseID]):
     course_id: int
     _api: EdStemAPI
 
-    def __init__(self, course_id: int): #, api_constructor: Optional[Callable[[str], EdStemAPI]] = None):
+    def __init__(self, course_id: CourseID): #, api_constructor: Optional[Callable[[str], EdStemAPI]] = None):
         self.course_id = course_id
         self._api = EdStemAPI()
 
@@ -29,7 +30,7 @@ class EdCourse:
     def get_all_users(self) -> list[User]:
         return self._api.get_users(self.course_id)
 
-    def get_user(self, user: int | str) -> User:
+    def get_user(self, user: UserID | str) -> User:
         users = self.get_all_users()
         return _filter_id_or_name(users, user)
 
@@ -46,8 +47,8 @@ class EdCourse:
             tutorials.append(k)
         return tutorials
 
-    def get_tutorial(self, user: int | str) -> str:
-        user = self.get_user()
+    def get_tutorial(self, user_identifier: UserID | str) -> str:
+        user = self.get_user(user_identifier)
         return user["tutorial"]
 
     ## TODO Get analytics users?
@@ -56,6 +57,6 @@ class EdCourse:
     def get_all_modules(self) -> list[Module]:
         return self._api.get_all_modules()
 
-    def get_module(self, module: int | str) -> Module:
+    def get_module(self, module: ModuleID | str) -> Module:
         modules = self.get_all_modules()
         return _filter_id_or_name(modules, module)
