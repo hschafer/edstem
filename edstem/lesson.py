@@ -58,9 +58,10 @@ class QuizSettings:
 class Lesson(EdObject[LessonID]):
     lesson_number: int
     course_id: CourseID
+    module_id: Optional[ModuleID]
     creator_id: UserID
     created_at: datetime
-    openable: bool  # Can the user open the assignment ()
+    openable: bool  # Can the user open the assignment
     visibility_settings: VisibilitySettings
     access_settings: AccessSettings
     scheduled_settings: ScheduledSettings
@@ -72,6 +73,7 @@ class Lesson(EdObject[LessonID]):
         id: LessonID,
         lesson_number: int,
         course_id: CourseID,
+        module_id: Optional[ModuleID],
         creator_id: UserID,
         created_at: datetime | str,
         openable: bool,
@@ -86,6 +88,7 @@ class Lesson(EdObject[LessonID]):
         super().__init__(name, id, **kwargs)
         self.lesson_number = lesson_number
         self.course_id = course_id
+        self.module_id = module_id
         self.creator_id = creator_id
         self.openable = openable
 
@@ -237,6 +240,9 @@ class Lesson(EdObject[LessonID]):
 
     def get_course_id(self) -> CourseID:
         return self.course_id
+
+    def get_module_id(self) -> Optional[ModuleID]:
+        return self.module_id
 
     def get_creator_id(self) -> UserID:
         return self.creator_id

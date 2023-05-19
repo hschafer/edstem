@@ -72,3 +72,10 @@ class ModuleTest(BaseTest):
         # ID not found
         with self.assertRaises(ValueError):
             Module.get_module(TEST_COURSE_ID, 3)
+
+    def test_get_lesson(self):
+        module = Module.from_dict(TEST_MODULE_0_JSON)
+
+        lessons = module.get_lessons()
+        self.assertEqual(1, len(lessons))
+        self.assertEqual(60007, lessons[0].get_id())

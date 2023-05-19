@@ -78,7 +78,7 @@ TEST_LESSON_0_JSON: JSON = {
     "last_viewed_slide_id": 335934,
     "late_submissions": True,
     "locked_at": "2023-05-19T08:00:00+10:00",
-    "module_id": None,
+    "module_id": 13194,
     "number": -1,
     "openable": False,
     "original_id": None,
