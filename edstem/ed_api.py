@@ -158,7 +158,7 @@ class EdStemAPI:
         return response.content
 
     # Enrollment info
-    def get_users(self, course_id: int) -> list[dict[str, Any]]:
+    def get_all_users(self, course_id: int) -> list[dict[str, Any]]:
         admin_path = urljoin(EdStemAPI.API_URL, f"courses/{course_id}/admin")
         admin_info = self._get_request(admin_path)
         return admin_info["users"]
@@ -539,7 +539,7 @@ class EdStemAPI:
         result = self._get_request(users_path)["users"]
         return result
 
-    def get_all_users(self):
+    def get_all_users_analytics(self):
         users = self._get_request(
             urljoin(EdStemAPI.API_URL, "courses", self._course_id, "analytics", "users")
         )["users"]

@@ -20,7 +20,7 @@ class EdCourse(EdObject[CourseID]):
 
     # Users
     def get_all_users(self) -> list[User]:
-        return [User.from_dict(u) for u in self._api.get_users(self.course_id)]
+        return [User.from_dict(u) for u in self._api.get_all_users(self.course_id)]
 
     def get_user(self, user: UserID | str) -> User:
         users = self.get_all_users()

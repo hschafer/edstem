@@ -162,7 +162,7 @@ TEST_LESSON_JSON = [TEST_LESSON_0_JSON, TEST_LESSON_1_JSON]
 
 def MockAPI():
     mock_api = MagicMock(spec=EdStemAPI)
-    mock_api().get_users.return_value = TEST_USER_JSON
+    mock_api().get_all_users.return_value = TEST_USER_JSON
     mock_api().get_all_modules.return_value = TEST_MODULE_JSON
     mock_api().get_all_lessons.return_value = TEST_LESSON_JSON
     return mock_api
