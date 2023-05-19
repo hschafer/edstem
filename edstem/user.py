@@ -19,7 +19,7 @@ class User(EdObject[UserID]):
         tutorial: Optional[str] = None,
         accepted: bool = False,
         source_id: str = "",
-        **kwargs
+        **kwargs,
     ) -> None:
         # Currently left out: username, lab_id, lti_synced
         super().__init__(name, id, **kwargs)
@@ -63,3 +63,19 @@ class User(EdObject[UserID]):
             self.accepted,
             self.source_id,
         )
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id}, name={self.name})"
+
+    # API Methods
+    @staticmethod
+    def get_all_users(course_id: CourseID) -> list["User"]:
+        api = EdStemAPI()
+        users = api.get_all_users(course_id)
+        print(users)
+        return [User.from_dict(u) for u in users]
+
+    @staticmethod
+    def get_user(course_id: CourseID, id_or_name: UserID | str) -> "User":
+        users = User.get_all_users(course_id)
+        return EdObject._filter_single_id_or_name(users, id_or_name)

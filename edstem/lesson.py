@@ -58,9 +58,10 @@ class QuizSettings:
 class Lesson(EdObject[LessonID]):
     lesson_number: int
     course_id: CourseID
+    module_id: Optional[ModuleID]
     creator_id: UserID
     created_at: datetime
-    openable: bool  # Can the user open the assignment ()
+    openable: bool  # Can the user open the assignment
     visibility_settings: VisibilitySettings
     access_settings: AccessSettings
     scheduled_settings: ScheduledSettings
@@ -72,6 +73,7 @@ class Lesson(EdObject[LessonID]):
         id: LessonID,
         lesson_number: int,
         course_id: CourseID,
+        module_id: Optional[ModuleID],
         creator_id: UserID,
         created_at: datetime | str,
         openable: bool,
@@ -86,6 +88,7 @@ class Lesson(EdObject[LessonID]):
         super().__init__(name, id, **kwargs)
         self.lesson_number = lesson_number
         self.course_id = course_id
+        self.module_id = module_id
         self.creator_id = creator_id
         self.openable = openable
 
@@ -238,6 +241,9 @@ class Lesson(EdObject[LessonID]):
     def get_course_id(self) -> CourseID:
         return self.course_id
 
+    def get_module_id(self) -> Optional[ModuleID]:
+        return self.module_id
+
     def get_creator_id(self) -> UserID:
         return self.creator_id
 
@@ -273,3 +279,26 @@ class Lesson(EdObject[LessonID]):
 
     def __repr__(self) -> str:
         return f"Lesson(id={self.id}, name={self.name})"
+
+    # API Methods
+    @staticmethod
+    def get_all_lessons(course_id: CourseID) -> list["Lesson"]:
+        api = EdStemAPI()
+        lessons = api.get_all_lessons(course_id)
+        return [Lesson.from_dict(l) for l in lessons]
+
+    @staticmethod
+    def get_lesson(course_id: CourseID, id_or_name: LessonID | str) -> "Lesson":
+        lessons = Lesson.get_all_lessons(course_id)
+        return EdObject._filter_single_id_or_name(lessons, id_or_name)
+
+    def get_module(self) -> Optional["Module"]:
+        if self.module_id is None:
+            return None
+        else:
+            return Module.get_module(self.course_id, self.module_id)
+
+
+from edstem.module import (
+    Module,
+)  # Kind of a hack to avoid circular dependency being unresolvable
