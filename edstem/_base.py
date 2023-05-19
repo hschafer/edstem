@@ -34,7 +34,7 @@ class EdObject(Generic[IdType]):
 
     @staticmethod
     def from_dict(d: JSON) -> "EdObject":
-        raise NotImplemented
+        raise NotImplementedError
 
     @staticmethod
     def _filter_id_or_name(
