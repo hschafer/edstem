@@ -11,10 +11,12 @@ CourseID = NewType("CourseID", int)
 UserID = NewType("UserID", int)
 ModuleID = NewType("ModuleID", int)
 LessonID = NewType("LessonID", int)
+# Discussion? Slide? Quiz Question? Challenge?
 
 JSON = dict[str, Any]
 
-# Discussion? Slide? Quiz Question? Challenge?
+# Helper functions
+
 
 IdType = TypeVar("IdType", bound=int)
 
