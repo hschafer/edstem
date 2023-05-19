@@ -340,7 +340,7 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "62d8677e1d4ab446d3673c647b862fc352b35d1b533134f67e0ffc63dc5b748d"
+content-hash = "3a8eb4265f5fe619dc6182a6d55e3c1e27463138cd0ada7fd35c43345bd45693"
 
 [metadata.files]
 black = [

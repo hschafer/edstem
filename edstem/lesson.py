@@ -57,7 +57,7 @@ class QuizSettings:
 
 
 class Lesson(EdObject[LessonID]):
-    number: int
+    lesson_number: int
     course_id: CourseID
     creator_id: UserID
     created_at: datetime
@@ -71,7 +71,7 @@ class Lesson(EdObject[LessonID]):
         self,
         name: str,
         id: LessonID,
-        number: int,
+        lesson_number: int,
         course_id: CourseID,
         creator_id: UserID,
         created_at: datetime | str,
@@ -85,7 +85,7 @@ class Lesson(EdObject[LessonID]):
     ) -> None:
         # Currently left out: updated_at (assumed always null?), state, status
         super().__init__(name, id, **kwargs)
-        self.number = number
+        self.lesson_number = lesson_number
         self.course_id = course_id
         self.creator_id = creator_id
         self.openable = openable
@@ -153,7 +153,8 @@ class Lesson(EdObject[LessonID]):
         data = dict(data)
 
         ids = Lesson._pull_from_dict(
-            data, [("user_id", "creator_id"), ("title", "name")]
+            data,
+            [("user_id", "creator_id"), ("title", "name"), ("index", "lesson_number")],
         )
         data = data | ids  # In this case we want to put them back in
 
@@ -196,6 +197,12 @@ class Lesson(EdObject[LessonID]):
 
         # Make access settings
         access_data = Lesson._pull_from_dict(data, ["password", "tutorial_regex"])
+        access_data["password"] = (
+            access_data["password"] if access_data["password"] else None
+        )
+        access_data["tutorial_regex"] = (
+            access_data["tutorial_regex"] if access_data["tutorial_regex"] else None
+        )
         data["access_settings"] = AccessSettings(
             access_data["password"], access_data["tutorial_regex"], timer, prereqs
         )
@@ -237,6 +244,27 @@ class Lesson(EdObject[LessonID]):
 
     def get_created_at(self) -> datetime:
         return self.created_at
+
+    def get_openable(self) -> bool:
+        return self.openable
+
+    def get_visibility_settings(self) -> VisibilitySettings:
+        """
+        Note: Returns reference, so mutations will persist
+        """
+        return self.visibility_settings
+
+    def get_access_settings(self) -> AccessSettings:
+        """
+        Note: Returns reference, so mutations will persist
+        """
+        return self.access_settings
+
+    def get_scheduled_settings(self) -> ScheduledSettings:
+        """
+        Note: Returns reference, so mutations will persist
+        """
+        return self.scheduled_settings
 
     def _tuple(self) -> tuple:
         return (
