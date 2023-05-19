@@ -291,3 +291,14 @@ class Lesson(EdObject[LessonID]):
     def get_lesson(course_id: CourseID, id_or_name: LessonID | str) -> "Lesson":
         lessons = Lesson.get_all_lessons(course_id)
         return EdObject._filter_single_id_or_name(lessons, id_or_name)
+
+    def get_module(self) -> Optional["Module"]:
+        if self.module_id is None:
+            return None
+        else:
+            return Module.get_module(self.course_id, self.module_id)
+
+
+from edstem.module import (
+    Module,
+)  # Kind of a hack to avoid circular dependency being unresolvable
