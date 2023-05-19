@@ -164,24 +164,24 @@ class EdStemAPI:
         return admin_info["users"]
 
     # Get lesson info
-    def get_all_lessons(self) -> List[Dict[str, Any]]:
+    def get_all_lessons(self, course_id: int) -> list[dict[str, Any]]:
         """Gets all lessons for a course. Endpoint: /courses/{course_id}/lessons
 
         Returns:
             A list of JSON objects, one for each lesson.
         """
-        lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
+        lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{course_id}/lessons")
         lessons = self._get_request(lessons_path)
         return lessons["lessons"]
 
     # Get module info
-    def get_all_modules(self) -> list[dict[str, Any]]:
+    def get_all_modules(self, course_id: int) -> list[dict[str, Any]]:
         """Gets all modules for a course. Endpoint: /courses/{}/lessons
 
         Returns:
             A list of JSON objects, one for each module.
         """
-        lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{self._course_id}/lessons")
+        lessons_path = urljoin(EdStemAPI.API_URL, f"courses/{course_id}/lessons")
         lessons = self._get_request(lessons_path)
         return lessons["modules"]
 

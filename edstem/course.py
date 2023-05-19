@@ -7,24 +7,6 @@ from edstem.lesson import Lesson
 from edstem.module import Module
 from edstem.user import User
 
-I = TypeVar("I", bound=int)
-V = TypeVar("V", bound=EdObject)
-
-
-def _filter_id_or_name(values: list[V], id_or_name: I | str) -> list[V]:
-    return [v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name]
-
-
-def _filter_single_id_or_name(values: list[V], id_or_name: I | str) -> V:
-    filtered = _filter_id_or_name(values, id_or_name)
-    if len(filtered) == 0:
-        raise ValueError(f"Identifier failed to identify any objects: {id_or_name}")
-    elif len(filtered) > 1:
-        raise ValueError(
-            f"Identifier identified too many objects: {id_or_name} (found {len(filtered)})"
-        )
-    return filtered[0]
-
 
 class EdCourse(EdObject[CourseID]):
     course_id: int
@@ -42,7 +24,7 @@ class EdCourse(EdObject[CourseID]):
 
     def get_user(self, user: UserID | str) -> User:
         users = self.get_all_users()
-        return _filter_single_id_or_name(users, user)
+        return EdObject._filter_single_id_or_name(users, user)
 
     def get_all_tutorials(self) -> set[str]:
         users = self.get_all_users()
@@ -62,17 +44,17 @@ class EdCourse(EdObject[CourseID]):
 
     # Modules
     def get_all_modules(self) -> list[Module]:
-        return [Module.from_dict(m) for m in self._api.get_all_modules()]
+        return [Module.from_dict(m) for m in self._api.get_all_modules(self.course_id)]
 
     def get_module(self, id_or_name: ModuleID | str) -> Module:
         modules = self.get_all_modules()
-        return _filter_single_id_or_name(modules, id_or_name)
+        return EdObject._filter_single_id_or_name(modules, id_or_name)
 
     # Lessons
     def get_all_lessons(self) -> list[Lesson]:
-        lessons = self._api.get_all_lessons()
+        lessons = self._api.get_all_lessons(self.course_id)
         return [Lesson.from_dict(l) for l in lessons]
 
     def get_lesson(self, id_or_name: LessonID | str) -> Lesson:
         lessons = self.get_all_lessons()
-        return _filter_single_id_or_name(lessons, id_or_name)
+        return EdObject._filter_single_id_or_name(lessons, id_or_name)
