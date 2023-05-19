@@ -1,17 +1,21 @@
 import os
+from typing import Optional
 
-AUTH_TOKEN = None
+auth_token: Optional[str] = None
 
 
-def auth_token(token_or_file: str) -> str:
+def parse_auth_token(token_or_file: str) -> str:
     if os.path.exists(token_or_file):
-        with open(token_or_file) as f:
+        with open(token_or_file, "r") as f:
             return f.read().strip()
     else:  # Just a token
         return token_or_file
 
 
 def set_token(token_or_file: str) -> None:
-    global AUTH_TOKEN
-    AUTH_TOKEN = auth_token(token_or_file)
-    # Check valid token?
+    global auth_token
+    auth_token = parse_auth_token(token_or_file)
+
+
+def get_token() -> Optional[str]:
+    return auth_token
