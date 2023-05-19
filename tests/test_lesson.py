@@ -48,3 +48,29 @@ class LessonTest(BaseTest):
         self.assertEqual(False, scheduled.release_quiz_correctness_only)
 
         # Low prio, but need to test quiz settings too
+
+    def test_get_all_lessons(self):
+        lessons = Lesson.get_all_lessons(TEST_COURSE_ID)
+        print(lessons)
+        self.assertEqual(
+            set(lessons), set(Lesson.from_dict(l) for l in TEST_LESSON_JSON)
+        )
+
+    def test_get_lesson(self):
+        # By ID
+        self.assertEqual(
+            Lesson.get_lesson(TEST_COURSE_ID, 60007),
+            Lesson.from_dict(TEST_LESSON_0_JSON),
+        )
+        # By name
+        self.assertEqual(
+            Lesson.get_lesson(TEST_COURSE_ID, "Example Lesson"),
+            Lesson.from_dict(TEST_LESSON_1_JSON),
+        )
+
+        # Name not found
+        with self.assertRaises(ValueError):
+            Lesson.get_lesson(TEST_COURSE_ID, "Not a lesson")
+        # ID not found
+        with self.assertRaises(ValueError):
+            Lesson.get_lesson(TEST_COURSE_ID, 3)

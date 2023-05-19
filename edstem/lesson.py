@@ -273,3 +273,15 @@ class Lesson(EdObject[LessonID]):
 
     def __repr__(self) -> str:
         return f"Lesson(id={self.id}, name={self.name})"
+
+    # API Methods
+    @staticmethod
+    def get_all_lessons(course_id: CourseID) -> list["Lesson"]:
+        api = EdStemAPI()
+        lessons = api.get_all_lessons(course_id)
+        return [Lesson.from_dict(l) for l in lessons]
+
+    @staticmethod
+    def get_lesson(course_id: CourseID, id_or_name: LessonID | str) -> "Lesson":
+        lessons = Lesson.get_all_lessons(course_id)
+        return EdObject._filter_single_id_or_name(lessons, id_or_name)
