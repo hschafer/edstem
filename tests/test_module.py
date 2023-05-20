@@ -1,3 +1,6 @@
+import copy
+
+import responses
 from testing_utils import *
 
 from edstem.module import Module
@@ -79,3 +82,37 @@ class ModuleTest(BaseTest):
         lessons = module.get_lessons()
         self.assertEqual(1, len(lessons))
         self.assertEqual(60007, lessons[0].get_id())
+
+    @responses.activate
+    def test_module_edit(self):
+        # Stop other API patches
+        self._stop_api_patch()
+        edstem.auth.set_token("Fake Token")
+
+        # Make module and set it's name
+        module = Module.from_dict(TEST_MODULE_0_JSON)
+        module.set_name("Foo")
+
+        self.assertEqual("Foo", module.get_name())
+        self.assertEqual(set(["name"]), module._changes)
+
+        # Patch the specific request methods instead to check their inputs/outputs
+        expected_data = TEST_MODULE_0_JSON | {"name": "Foo"}
+        get_response = responses.Response(
+            method="GET",
+            url="https://us.edstem.org/api/courses/1234/lessons",
+            json={"modules": copy.deepcopy(TEST_MODULE_JSON)},
+        )
+        put_response = responses.Response(
+            method="PUT",
+            url=f"https://us.edstem.org/api/lessons/modules/{TEST_MODULE_0_JSON['id']}",
+            json={"module": expected_data},
+        )
+        responses.add(get_response)
+        responses.add(put_response)
+
+        # Post changes and inspect response
+        module.post_changes()
+        current_data = module._to_dict(rename_ed=True)
+
+        self.assertEqual(expected_data, current_data)

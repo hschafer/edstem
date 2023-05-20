@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from datetime import datetime
 from typing import Optional
 
@@ -38,7 +39,41 @@ class Module(EdObject[ModuleID]):
         del data["user_id"]
         return Module(**data)
 
-    # TODO Set name?
+    def _to_dict(
+        self, changes_only: bool = False, rename_ed: bool = False
+    ) -> dict[str, Any]:
+        props: Iterable[str]
+        if changes_only:
+            props = self._changes
+        else:
+            props = [
+                "id",
+                "name",
+                "course_id",
+                "creator_id",
+                "created_at",
+            ]
+
+        # Turn to dict
+        data = {}
+        for prop in props:
+            data[prop] = getattr(self, prop)
+
+        # Add in extra props
+        for prop in self.extra_props.keys():
+            data[prop] = self.extra_props[prop]
+
+        if rename_ed:
+            # Rename keys in dict
+            if "creator_id" in data:
+                data["user_id"] = data["creator_id"]
+                del data["creator_id"]
+        return data
+
+    def set_name(self, name: str) -> "Module":
+        self._changes.add("name")
+        self.name = name
+        return self
 
     def get_course_id(self) -> CourseID:
         return self.course_id
@@ -79,3 +114,15 @@ class Module(EdObject[ModuleID]):
     def get_lesson(self, id_or_name: LessonID | str) -> Lesson:
         lessons = self.get_lessons()
         return EdObject._filter_single_id_or_name(lessons, id_or_name)
+
+    def post_changes(self, ignore_errors: bool = False) -> bool:
+        try:
+            module_data = self._to_dict(changes_only=True, rename_ed=True)
+            module_data = self._api.edit_module(self.course_id, self.id, module_data)
+            self.__dict__.update(module_data)
+            return True
+        except Exception as e:
+            if ignore_errors:
+                return False
+            else:
+                raise e

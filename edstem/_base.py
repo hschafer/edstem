@@ -24,6 +24,7 @@ class EdObject(Generic[IdType]):
     name: str
     id: IdType
     extra_props: JSON
+    _changes: set[str]
     _api: EdStemAPI
 
     def __init__(self, name: str, id: IdType, **kwargs):
@@ -31,10 +32,32 @@ class EdObject(Generic[IdType]):
         self.id = id
         self.extra_props = kwargs
         self._api = EdStemAPI()
+        self._changes = set()
 
     @staticmethod
     def from_dict(d: JSON) -> "EdObject":
         raise NotImplementedError
+
+    @staticmethod
+    def _filter_id_or_name(
+        values: list[ValueType], id_or_name: IdType | str
+    ) -> list[ValueType]:
+        return [
+            v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name
+        ]
+
+    @staticmethod
+    def _filter_single_id_or_name(
+        values: list[ValueType], id_or_name: IdType | str
+    ) -> ValueType:
+        filtered = EdObject._filter_id_or_name(values, id_or_name)
+        if len(filtered) == 0:
+            raise ValueError(f"Identifier failed to identify any objects: {id_or_name}")
+        elif len(filtered) > 1:
+            raise ValueError(
+                f"Identifier identified too many objects: {id_or_name} (found {len(filtered)})"
+            )
+        return filtered[0]
 
     @staticmethod
     def _filter_id_or_name(
@@ -69,18 +92,20 @@ class EdObject(Generic[IdType]):
 
     # TODO need to go back to Ed String format?
 
+    # Getters
     def get_name(self) -> str:
         return self.name
 
     def get_id(self) -> IdType:
         return self.id
 
-    def get_extra_props(self, key=None) -> JSON | Any:
-        if key is None:
-            return self.extra_props
-        else:
-            return self.extra_props[key]
+    def get_extra_props(self) -> JSON:
+        return self.extra_props
 
+    def get_extra_prop(self, key: str) -> Any:
+        return self.extra_props[key]
+
+    # General functions
     def _tuple(self) -> tuple:
         raise NotImplementedError
 
