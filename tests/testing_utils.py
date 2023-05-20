@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+import edstem.auth
 from edstem._base import JSON, CourseID
 from edstem.course import EdCourse
 from edstem.ed_api import EdStemAPI
@@ -187,6 +188,9 @@ class BaseTest(unittest.TestCase):
 
         self.course = EdCourse(CourseID(TEST_COURSE_ID))
 
-    def tearDown(self) -> None:
+    def _stop_api_patch(self) -> None:
         for patcher in self.mock_patchers.values():
             patcher.stop()
+
+    def tearDown(self) -> None:
+        self._stop_api_patch()
