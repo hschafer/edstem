@@ -60,27 +60,6 @@ class EdObject(Generic[IdType]):
         return filtered[0]
 
     @staticmethod
-    def _filter_id_or_name(
-        values: list[ValueType], id_or_name: IdType | str
-    ) -> list[ValueType]:
-        return [
-            v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name
-        ]
-
-    @staticmethod
-    def _filter_single_id_or_name(
-        values: list[ValueType], id_or_name: IdType | str
-    ) -> ValueType:
-        filtered = EdObject._filter_id_or_name(values, id_or_name)
-        if len(filtered) == 0:
-            raise ValueError(f"Identifier failed to identify any objects: {id_or_name}")
-        elif len(filtered) > 1:
-            raise ValueError(
-                f"Identifier identified too many objects: {id_or_name} (found {len(filtered)})"
-            )
-        return filtered[0]
-
-    @staticmethod
     def str_to_datetime(timestamp: str, timezone: Optional[str] = None) -> datetime:
         result = to_datetime(timestamp)
         if timezone:
