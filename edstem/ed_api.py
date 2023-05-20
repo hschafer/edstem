@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from edstem.auth import AUTH_TOKEN
+from edstem.auth import get_token
 
 # Special type to indicate only a 0 or 1 should be passed
 BinaryFlag = int
@@ -42,12 +42,13 @@ class EdStemAPI:
 
     def __init__(self):
         """Initializes access to the EdStem API."""
-        if AUTH_TOKEN is None:
+        token = get_token()
+        if token is None:
             raise ValueError(
                 "Must specify auth token before using Ed API. Refer to edstem.auth.set_token(...)"
             )
 
-        self._token = AUTH_TOKEN
+        self._token = token
         self._course_id = None  # TODO fix methods that rely on this
 
     # General functions for GET/POST

@@ -59,10 +59,15 @@ class Module(EdObject[ModuleID]):
         for prop in props:
             data[prop] = getattr(self, prop)
 
+        # Add in extra props
+        for prop in self.extra_props.keys():
+            data[prop] = self.extra_props[prop]
+
         if rename_ed:
             # Rename keys in dict
-            data["user_id"] = data["creator_id"]
-            del data["creator_id"]
+            if "creator_id" in data:
+                data["user_id"] = data["creator_id"]
+                del data["creator_id"]
         return data
 
     def set_name(self, name: str) -> "Module":
