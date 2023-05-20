@@ -91,9 +91,9 @@ class ModuleTest(BaseTest):
 
         # Make module and set it's name
         module = Module.from_dict(TEST_MODULE_0_JSON)
-        module.set_name("Foo")
+        module.name = "Foo"
 
-        self.assertEqual("Foo", module.get_name())
+        self.assertEqual("Foo", module.name)
         self.assertEqual(set(["name"]), module._changes)
 
         # Patch the specific request methods instead to check their inputs/outputs
@@ -113,6 +113,8 @@ class ModuleTest(BaseTest):
 
         # Post changes and inspect response
         module.post_changes()
-        current_data = module._to_dict(rename_ed=True)
+        current_data = module._to_dict(changes_only=False)
 
+        print(expected_data)
+        print(current_data)
         self.assertEqual(expected_data, current_data)

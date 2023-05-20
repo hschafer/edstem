@@ -273,12 +273,12 @@ class Lesson(EdObject[LessonID]):
 
     def _tuple(self) -> tuple:
         return (
-            self.name,
-            self.id,
+            self._name,
+            self._id,
         )
 
     def __repr__(self) -> str:
-        return f"Lesson(id={self.id}, name={self.name})"
+        return f"Lesson(id={self._id}, name={self._name})"
 
     # API Methods
     @staticmethod

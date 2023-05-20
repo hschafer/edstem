@@ -55,8 +55,8 @@ class User(EdObject[UserID]):
 
     def _tuple(self) -> tuple:
         return (
-            self.name,
-            self.id,
+            self._name,
+            self._id,
             self.email,
             self.role,
             self.tutorial,
@@ -65,7 +65,7 @@ class User(EdObject[UserID]):
         )
 
     def __repr__(self) -> str:
-        return f"User(id={self.id}, name={self.name})"
+        return f"User(id={self._id}, name={self._name})"
 
     # API Methods
     @staticmethod

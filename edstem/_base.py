@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from typing import Any, Generic, NewType, Optional, TypeVar
 
@@ -20,23 +21,27 @@ IdType = TypeVar("IdType", bound=int)
 ValueType = TypeVar("ValueType", bound="EdObject")
 
 
+def _rename_dict(d: dict[str, Any], renames: list[tuple[str, str]]) -> dict[str, Any]:
+    d = copy.deepcopy(d)
+    for old_key, new_key in renames:
+        d[new_key] = d[old_key]
+        del d[old_key]
+    return d
+
+
 class EdObject(Generic[IdType]):
-    name: str
-    id: IdType
+    _name: str
+    _id: IdType
     extra_props: JSON
     _changes: set[str]
     _api: EdStemAPI
 
     def __init__(self, name: str, id: IdType, **kwargs):
-        self.name = name
-        self.id = id
+        self._name = name
+        self._id = id
         self.extra_props = kwargs
         self._api = EdStemAPI()
         self._changes = set()
-
-    @staticmethod
-    def from_dict(d: JSON) -> "EdObject":
-        raise NotImplementedError
 
     @staticmethod
     def _filter_id_or_name(
@@ -60,8 +65,11 @@ class EdObject(Generic[IdType]):
         return filtered[0]
 
     @staticmethod
-    def str_to_datetime(timestamp: str, timezone: Optional[str] = None) -> datetime:
+    def str_to_datetime(
+        timestamp: str | datetime, timezone: str | None = None
+    ) -> datetime:
         result = to_datetime(timestamp)
+
         if timezone:
             if result.tz:
                 result = result.tz_localize(timezone)
@@ -73,10 +81,10 @@ class EdObject(Generic[IdType]):
 
     # Getters
     def get_name(self) -> str:
-        return self.name
+        return self._name
 
     def get_id(self) -> IdType:
-        return self.id
+        return self._id
 
     def get_extra_props(self) -> JSON:
         return self.extra_props
