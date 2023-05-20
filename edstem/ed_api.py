@@ -185,6 +185,29 @@ class EdStemAPI:
         lessons = self._get_request(lessons_path)
         return lessons["modules"]
 
+    # Edit module info
+    def edit_module(
+        self, course_id: int, module_id: int, data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Modifies an existing Ed Module. Endpoint: /lessons/modules/{module_id}
+
+        Args:
+            module_id: Identifier for module
+            data: Dictionary of options to set on the module
+
+        Returns:
+            A JSON object with the updated module's metadata
+        """
+        modules = self.get_all_modules(course_id)
+        modules = [m for m in modules if m["id"] == module_id]
+        assert len(modules) == 1
+        module = modules[0]
+
+        module_path = urljoin(EdStemAPI.API_URL, f"lessons/modules/{module_id}")
+        module_dict = {"module": module | data}
+        module = json.loads(self._put_request(module_path, json=module_dict))["module"]
+        return module
+
     def get_lesson(self, lesson_id: int) -> Dict[str, Any]:
         """Gets metadata for a single lesson. Endpoint: /lessons/{lesson_id}
 

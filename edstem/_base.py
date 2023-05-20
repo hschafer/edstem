@@ -24,6 +24,7 @@ class EdObject(Generic[IdType]):
     name: str
     id: IdType
     extra_props: JSON
+    _changes: set[str]
     _api: EdStemAPI
 
     def __init__(self, name: str, id: IdType, **kwargs):
@@ -31,6 +32,7 @@ class EdObject(Generic[IdType]):
         self.id = id
         self.extra_props = kwargs
         self._api = EdStemAPI()
+        self._changes = set()
 
     @staticmethod
     def from_dict(d: JSON) -> "EdObject":
@@ -69,18 +71,20 @@ class EdObject(Generic[IdType]):
 
     # TODO need to go back to Ed String format?
 
+    # Getters
     def get_name(self) -> str:
         return self.name
 
     def get_id(self) -> IdType:
         return self.id
 
-    def get_extra_props(self, key=None) -> JSON | Any:
-        if key is None:
-            return self.extra_props
-        else:
-            return self.extra_props[key]
+    def get_extra_props(self) -> JSON:
+        return self.extra_props
 
+    def get_extra_prop(self, key: str) -> Any:
+        return self.extra_props[key]
+
+    # General functions
     def _tuple(self) -> tuple:
         raise NotImplementedError
 
