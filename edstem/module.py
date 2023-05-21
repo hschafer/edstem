@@ -2,28 +2,25 @@ from datetime import datetime
 from typing import TypedDict
 
 from pyparsing import Any, Iterable
+from typing_extensions import NotRequired
 
 import edstem._base as base
 from edstem.ed_api import EdStemAPI
 from edstem.lesson import Lesson
 
 
-# TODO Current hack for not Python 3.11.
-# Should increase required version to 3.11 and make one object with NotREquired
-class _ModuleDataBase(TypedDict):
+# Not used explicitly because mypy is too strict, but good documentation for the expected keys to/from Ed
+class ModuleData(TypedDict):
     id: base.ModuleID
     name: str
     course_id: base.CourseID
     user_id: base.UserID
     created_at: str | None
-
-
-class ModuleData(_ModuleDataBase, total=False):
-    updated_at: str | None
+    updated_at: NotRequired[str | None]
 
 
 class Module(base.EdObject[base.ModuleID]):
-    _data: ModuleData
+    _data: dict[str, Any]
 
     def __init__(
         self,
@@ -47,9 +44,10 @@ class Module(base.EdObject[base.ModuleID]):
         }
 
     @staticmethod
-    def from_dict(data: ModuleData) -> "Module":
-        data = base._rename_dict(data, [("user_id", "creator_id")])
-        return Module(**data)
+    def from_dict(data: dict[str, Any]) -> "Module":
+        base._proper_keys(data, ModuleData)
+        rename_data = base._rename_dict(data, [("user_id", "creator_id")])  # type: ignore
+        return Module(**rename_data)
 
     @property
     def id(self) -> base.ModuleID:
@@ -74,7 +72,8 @@ class Module(base.EdObject[base.ModuleID]):
 
     @property
     def created_at(self) -> datetime | None:
-        return self._data["created_at"]
+        # Cache?
+        return Module.str_to_datetime(self._data["created_at"])
 
     def _tuple(self) -> tuple:
         return (
@@ -99,7 +98,7 @@ class Module(base.EdObject[base.ModuleID]):
         course_id: base.CourseID, id_or_name: base.ModuleID | str
     ) -> "Module":
         modules = Module.get_all_modules(course_id)
-        return Module._filter_single_id_or_name(modules, id_or_name)
+        return Module._filter_single_id_or_name(modules, id_or_name)  # type: ignore
 
     def get_lessons(self) -> list[Lesson]:
         lessons = Lesson.get_all_lessons(self.course_id)
@@ -107,9 +106,10 @@ class Module(base.EdObject[base.ModuleID]):
 
     def get_lesson(self, id_or_name: base.LessonID | str) -> Lesson:
         lessons = self.get_lessons()
-        return Module._filter_single_id_or_name(lessons, id_or_name)
+        return Module._filter_single_id_or_name(lessons, id_or_name)  # type: ignore
 
     def _to_dict(self, changes_only=True) -> dict[str, Any]:
+        data: dict[str, Any]
         if changes_only:
             data = {k: self._data[k] for k in self._changes}
         else:

@@ -1,6 +1,6 @@
 import copy
 from datetime import datetime
-from typing import Any, Generic, NewType, Optional, TypeVar
+from typing import Any, Generic, NewType, Optional, TypedDict, TypeVar
 
 from pandas import to_datetime
 
@@ -27,6 +27,30 @@ def _rename_dict(d: dict[str, Any], renames: list[tuple[str, str]]) -> dict[str,
         d[new_key] = d[old_key]
         del d[old_key]
     return d
+
+
+# This might be totally broken but seems useful
+def _proper_keys(
+    d: dict[str, Any],
+    schema: TypedDict,  # type: ignore
+    check_types: bool = False,
+    assertion: bool = True,
+) -> bool:
+    keys_match = True
+    types_match = True
+    for key in schema.__required_keys__:  # type: ignore
+        if key not in d:
+            keys_match = False
+
+        # TODO This is broken, so defaulting to False
+        annotation = schema.__annotations__[key]  # type: ignore
+        if check_types and (key in d and type(d[key]) != annotation):
+            types_match = False
+
+    if assertion:
+        assert keys_match
+        assert types_match
+    return keys_match and types_match
 
 
 class EdObject(Generic[IdType]):
@@ -66,8 +90,10 @@ class EdObject(Generic[IdType]):
 
     @staticmethod
     def str_to_datetime(
-        timestamp: str | datetime, timezone: str | None = None
-    ) -> datetime:
+        timestamp: str | datetime | None, timezone: str | None = None
+    ) -> datetime | None:
+        if timestamp is None:
+            return None
         result = to_datetime(timestamp)
 
         if timezone:
