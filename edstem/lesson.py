@@ -93,7 +93,9 @@ class Lesson(EdObject[LessonID]):
         self.openable = openable
 
         if type(created_at) is str:
-            self.created_at = EdObject.str_to_datetime(created_at, timezone)
+            parsed_created_at = EdObject.str_to_datetime(created_at, timezone)
+            assert parsed_created_at is not None
+            self.created_at = parsed_created_at
         else:
             assert type(created_at) is datetime
             self.created_at = created_at
