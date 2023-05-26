@@ -29,7 +29,7 @@ class Module(base.EdObject[base.ModuleID]):
         updated_at: str | None,  # TODO datetime input?
         timezone: str | None = None,
     ) -> None:
-        super().__init__(name, id)
+        super().__init__()
         # Currently left out: updated_at (assumed always null?)
         self._data: ModuleData = {
             "id": id,
@@ -99,7 +99,7 @@ class Module(base.EdObject[base.ModuleID]):
 
     def get_lessons(self) -> list[Lesson]:
         lessons = Lesson.get_all_lessons(self.course_id)
-        return [lesson for lesson in lessons if lesson.get_module_id() == self.id]
+        return [lesson for lesson in lessons if lesson.module_id == self.id]
 
     def get_lesson(self, id_or_name: base.LessonID | str) -> Lesson:
         lessons = self.get_lessons()

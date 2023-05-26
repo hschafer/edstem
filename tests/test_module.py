@@ -81,7 +81,7 @@ class ModuleTest(BaseTest):
 
         lessons = module.get_lessons()
         self.assertEqual(1, len(lessons))
-        self.assertEqual(60007, lessons[0].get_id())
+        self.assertEqual(60007, lessons[0].id)
 
     @responses.activate
     def test_module_edit(self):

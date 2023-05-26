@@ -54,16 +54,10 @@ def _proper_keys(
 
 
 class EdObject(Generic[IdType]):
-    _name: str
-    _id: IdType
-    extra_props: JSON
     _changes: set[str]
     _api: EdStemAPI
 
-    def __init__(self, name: str, id: IdType, **kwargs):
-        self._name = name
-        self._id = id
-        self.extra_props = kwargs
+    def __init__(self, **kwargs):
         self._api = EdStemAPI()
         self._changes = set()
 
@@ -71,9 +65,7 @@ class EdObject(Generic[IdType]):
     def _filter_id_or_name(
         values: list[ValueType], id_or_name: IdType | str
     ) -> list[ValueType]:
-        return [
-            v for v in values if v.get_id() == id_or_name or v.get_name() == id_or_name
-        ]
+        return [v for v in values if v.id == id_or_name or v.name == id_or_name]
 
     @staticmethod
     def _filter_single_id_or_name(
@@ -104,19 +96,6 @@ class EdObject(Generic[IdType]):
         return result
 
     # TODO need to go back to Ed String format?
-
-    # Getters
-    def get_name(self) -> str:
-        return self._name
-
-    def get_id(self) -> IdType:
-        return self._id
-
-    def get_extra_props(self) -> JSON:
-        return self.extra_props
-
-    def get_extra_prop(self, key: str) -> Any:
-        return self.extra_props[key]
 
     # General functions
     def _tuple(self) -> tuple:

@@ -29,7 +29,7 @@ class User(base.EdObject[base.UserID]):
         **kwargs,
     ) -> None:
         # Currently left out: username, lab_id, lti_synced
-        super().__init__(name, id, **kwargs)
+        super().__init__()
         self._data: UserData = {
             "id": id,
             "name": name,
@@ -92,8 +92,8 @@ class User(base.EdObject[base.UserID]):
 
     def _tuple(self) -> tuple:
         return (
-            self._name,
-            self._id,
+            self.name,
+            self.id,
             self.email,
             self.role,
             self.tutorial,
@@ -102,7 +102,7 @@ class User(base.EdObject[base.UserID]):
         )
 
     def __repr__(self) -> str:
-        return f"User(id={self._id}, name={self._name})"
+        return f"User(id={self.id}, name={self.name})"
 
     # API Methods
     @staticmethod
