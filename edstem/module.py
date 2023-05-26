@@ -1,8 +1,5 @@
 from datetime import datetime
-from typing import TypedDict
-
-from pyparsing import Any, Iterable
-from typing_extensions import NotRequired
+from typing import Any, Iterable, NotRequired, TypedDict
 
 import edstem._base as base
 from edstem.ed_api import EdStemAPI
