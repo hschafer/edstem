@@ -1,19 +1,26 @@
-from typing import Optional
+from typing import Any, NotRequired, Optional, TypedDict
 
-from edstem._base import *
+import edstem._base as base
+from edstem.ed_api import EdStemAPI
 
 
-class User(EdObject[UserID]):
+class UserData(TypedDict):
+    id: base.UserID
+    name: str
     email: str
     role: str
-    tutorial: Optional[str]
+    tutorial: str | None
     accepted: bool
-    source_id: str
+    source_id: NotRequired[str]
+
+
+class User(base.EdObject[base.UserID]):
+    _data: dict[str, Any]
 
     def __init__(
         self,
         name: str,
-        id: UserID,
+        id: base.UserID,
         email: str,
         role: str,
         tutorial: Optional[str] = None,
@@ -23,35 +30,65 @@ class User(EdObject[UserID]):
     ) -> None:
         # Currently left out: username, lab_id, lti_synced
         super().__init__(name, id, **kwargs)
-        self.email = email
-        self.role = role
-        self.tutorial = tutorial
-        self.accepted = accepted
-        self.source_id = source_id
+        self._data: UserData = {
+            "id": id,
+            "name": name,
+            "email": email,
+            "role": role,
+            "tutorial": tutorial,
+            "accepted": accepted,
+            "source_id": source_id,
+        }
 
     @staticmethod
-    def from_dict(data: JSON) -> "User":
+    def from_dict(data: base.JSON) -> "User":
+        base._proper_keys(data, UserData)
         return User(**data)
 
     # TODO Set name, email, role?
 
-    def get_tutorial(self) -> Optional[str]:
-        return self.tutorial
+    @property
+    def id(self) -> base.UserID:
+        return self._data["id"]
 
-    def set_tutorail(self, tutorial: str) -> None:
-        self.tutorial = tutorial
+    @property
+    def name(self) -> str:
+        return self._data["name"]
 
-    def get_role(self) -> str:
-        return self.role
+    @name.setter
+    def name(self, value: str) -> None:
+        self._changes.add("name")
+        self._data["name"] = value
 
-    def set_role(self, role) -> None:
-        self.role = role
+    @property
+    def email(self) -> str:
+        return self._data["name"]
 
-    def get_accepted(self) -> bool:
-        return self.accepted
+    @property
+    def role(self) -> str:
+        return self._data["role"]
 
-    def get_source_id(self) -> str:
-        return self.source_id
+    @role.setter
+    def role(self, value: str) -> None:
+        self._changes.add("role")
+        self._data["role"] = value
+
+    @property
+    def tutorial(self) -> str | None:
+        return self._data["tutorial"]
+
+    @tutorial.setter
+    def tutorial(self, value: str | None) -> None:
+        self._changes.add("tutorial")
+        self._data["tutorial"] = value
+
+    @property
+    def accepted(self) -> bool:
+        return self._data["accepted"]
+
+    @property
+    def source_id(self) -> str:
+        return self._data["source_id"]
 
     def _tuple(self) -> tuple:
         return (
@@ -69,13 +106,12 @@ class User(EdObject[UserID]):
 
     # API Methods
     @staticmethod
-    def get_all_users(course_id: CourseID) -> list["User"]:
+    def get_all_users(course_id: base.CourseID) -> list["User"]:
         api = EdStemAPI()
         users = api.get_all_users(course_id)
-        print(users)
         return [User.from_dict(u) for u in users]
 
     @staticmethod
-    def get_user(course_id: CourseID, id_or_name: UserID | str) -> "User":
+    def get_user(course_id: base.CourseID, id_or_name: base.UserID | str) -> "User":
         users = User.get_all_users(course_id)
-        return EdObject._filter_single_id_or_name(users, id_or_name)
+        return base.EdObject._filter_single_id_or_name(users, id_or_name)

@@ -31,14 +31,13 @@ class EdCourse(EdObject[CourseID]):
 
         # Annoying but helpful for typing
         def get_default(u: User) -> str:
-            tutorial = u.get_tutorial()
-            return "" if tutorial is None else tutorial
+            return "" if u.tutorial is None else u.tutorial
 
         return set(get_default(u) for u in users)
 
     def get_tutorial(self, id_or_name: UserID | str) -> Optional[str]:
         user = self.get_user(id_or_name)
-        return user.get_tutorial()
+        return user.tutorial
 
     ## TODO Get analytics users?
 

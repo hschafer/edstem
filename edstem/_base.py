@@ -36,21 +36,21 @@ def _proper_keys(
     check_types: bool = False,
     assertion: bool = True,
 ) -> bool:
-    keys_match = True
-    types_match = True
-    for key in schema.__required_keys__:  # type: ignore
+    missing_keys: set[str] = set()
+    mismatch_types: set[tuple[str, type]] = set()
+    for key in schema.__required_keys__:  # type: ignore[attr-defined]
         if key not in d:
-            keys_match = False
+            missing_keys.add(key)
 
         # TODO This is broken, so defaulting to False
         annotation = schema.__annotations__[key]  # type: ignore
         if check_types and (key in d and type(d[key]) != annotation):
-            types_match = False
+            mismatch_types.add((key, type(d[key])))
 
     if assertion:
-        assert keys_match
-        assert types_match
-    return keys_match and types_match
+        assert len(missing_keys) == 0, f"Keys Mismatched {missing_keys}"
+        assert len(mismatch_types) == 0, f"Type mismatch {mismatch_types}"
+    return len(missing_keys) == 0 and len(mismatch_types) == 0
 
 
 class EdObject(Generic[IdType]):
