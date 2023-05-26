@@ -9,23 +9,21 @@ from edstem.lesson import Lesson
 class LessonTest(BaseTest):
     def test_from_dict(self):
         lesson = Lesson.from_dict(TEST_LESSON_0_JSON)
-        self.assertEqual("Example Assignment", lesson.get_name())
-        self.assertEqual(60007, lesson.get_id())
-        self.assertEqual(38139, lesson.get_course_id())
-        self.assertEqual(369, lesson.get_creator_id())
-        self.assertEqual(False, lesson.get_openable())
+        self.assertEqual("Example Assignment", lesson.name)
+        self.assertEqual(60007, lesson.id)
+        self.assertEqual(38139, lesson.course_id)
+        self.assertEqual(369, lesson.creator_id)
+        self.assertEqual(False, lesson.openable)
 
-        visibility = lesson.get_visibility_settings()
-        self.assertEqual(True, visibility.hidden)
-        self.assertEqual(False, visibility.unlisted)
+        self.assertEqual(True, lesson.visibility.hidden)
+        self.assertEqual(False, lesson.visibility.unlisted)
 
-        access = lesson.get_access_settings()
-        self.assertEqual(None, access.password)
-        self.assertEqual(None, access.tutorial_regex)
-        self.assertEqual(None, access.timer)
-        self.assertEqual([], access.prerequisites)
+        self.assertEqual(None, lesson.access_settings.password)
+        self.assertEqual(None, lesson.access_settings.tutorial_regex)
+        self.assertEqual(None, lesson.access_settings.timer)
+        self.assertEqual(tuple(), lesson.access_settings.prerequisites)
 
-        scheduled = lesson.get_scheduled_settings()
+        scheduled = lesson.schedule
         timezone = tz.gettz("America/Los_Angeles")
         self.assertEqual(
             datetime(2023, 5, 17, 15, 0, 0, 0, tzinfo=timezone), scheduled.available_at
