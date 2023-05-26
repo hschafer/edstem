@@ -31,9 +31,6 @@ class Lesson(base.EdObject[base.LessonID]):
     _timezone: str | None
 
     class VisibilitySettings:
-        hidden: bool
-        unlisted: bool
-
         def __init__(self, lesson: "Lesson") -> None:
             self._lesson = lesson
 
@@ -56,10 +53,6 @@ class Lesson(base.EdObject[base.LessonID]):
             self._lesson._data["is_unlisted"] = value
 
     class TimerSettings:
-        duration: int
-        effective_duration: int  # TODO Unsure
-        timer_expiration_access: bool  # TODO Unsure
-
         def __init__(self, lesson: "Lesson"):
             self._lesson = lesson
 
@@ -91,13 +84,9 @@ class Lesson(base.EdObject[base.LessonID]):
             self._lesson._data["timer_expiration_access"] = value
 
     class AccessSettings:
-        password: str | None
-        tutorial_regex: str | None
-        timer: Optional["Lesson.TimerSettings"]
-        prerequisites: tuple[Prerequisite]
-
         def __init__(self, lesson: "Lesson"):
             self._lesson = lesson
+            self._timer: Lesson.TimerSettings | None
             if lesson._data["is_timed"]:
                 self._timer = Lesson.TimerSettings(lesson)
             else:
@@ -130,17 +119,20 @@ class Lesson(base.EdObject[base.LessonID]):
             self._lesson._changes.add("is_timed")
             self._lesson._data["is_timed"] = value is not None
 
-            if value:
+            if value is None:
+                if self._timer is not None:
+                    self._timer.duration = 0
+                    self._timer.effective_duration = 0
+                    self._timer.expiration_access = False
+            else:
+                if self._timer is None:
+                    self._timer = Lesson.TimerSettings(self._lesson)
                 self._timer.duration = value.duration
                 self._timer.effective_duration = value.effective_duration
                 self._timer.expiration_access = value.expiration_access
-            else:
-                self._timer.duration = 0
-                self._timer.effective_duration = 0
-                self._timer.expiration_access = False
 
         @property
-        def prerequisites(self) -> tuple[Prerequisite]:
+        def prerequisites(self) -> tuple[Prerequisite, ...]:
             # TODO document immutable
             return tuple(
                 Prerequisite(
@@ -164,18 +156,6 @@ class Lesson(base.EdObject[base.LessonID]):
             ]
 
     class ScheduledSettings:
-        # Date settings
-        available_at: datetime | None
-        due_at: datetime | None
-        locked_at: datetime | None
-        solutions_at: datetime | None
-        late_submissions: bool
-        after_solution_submissions: bool
-        release_challenge_feedback: bool
-        release_challenge_solutions: bool
-        release_quiz_solutions: bool
-        release_quiz_correctness_only: bool
-
         def __init__(self, lesson: "Lesson") -> None:
             self._lesson = lesson
 
@@ -270,40 +250,36 @@ class Lesson(base.EdObject[base.LessonID]):
             self._lesson._data["release_quiz_correctness_only"] = value
 
     class QuizSettings:
-        quiz_question_number_style: str
-        quiz_mode: str
-        quiz_active_status: str
-
         def __init__(self, lesson: "Lesson") -> None:
             self._lesson = lesson
 
         # TODO Verify values
         @property
         def quiz_question_number_style(self) -> str:
-            return self._lesson.data["settings"]["quiz_question_number_style"]
+            return self._lesson._data["settings"]["quiz_question_number_style"]
 
         @quiz_question_number_style.setter
         def quiz_question_number_style(self, value: str) -> None:
             self._lesson._changes.add("settings")
-            self._lesson.data["settings"]["quiz_question_number_style"] = value
+            self._lesson._data["settings"]["quiz_question_number_style"] = value
 
         @property
         def quiz_mode(self) -> str:
-            return self._lesson.data["settings"]["quiz_mode"]
+            return self._lesson._data["settings"]["quiz_mode"]
 
         @quiz_mode.setter
         def quiz_mode(self, value: bool) -> None:
             self._lesson._changes.add("settings")
-            self._lesson.data["settings"]["quiz_mode"] = value
+            self._lesson._data["settings"]["quiz_mode"] = value
 
         @property
         def quiz_active_status(self) -> bool:
-            return self._lesson.data["settings"]["quiz_active_status"]
+            return self._lesson._data["settings"]["quiz_active_status"]
 
         @quiz_active_status.setter
         def quiz_active_status(self, value: bool) -> None:
             self._lesson._changes.add("settings")
-            self._lesson.data["settings"]["quiz_active_status"] = value
+            self._lesson._data["settings"]["quiz_active_status"] = value
 
     # TODO Right now we don't allow constructor setting of many settings and the setters need
     # To be called. Figure out a good interface for specifying settings at beginning if desired
@@ -347,7 +323,7 @@ class Lesson(base.EdObject[base.LessonID]):
         return Lesson(data)
 
     @property
-    def id(self) -> base.UserID:
+    def id(self) -> base.LessonID:
         return self._data["id"]
 
     @property

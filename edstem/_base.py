@@ -61,6 +61,15 @@ class EdObject(Generic[IdType]):
         self._api = EdStemAPI()
         self._changes = set()
 
+    # Getters all EdObjects will have
+    @property
+    def id(self) -> IdType:
+        raise NotImplementedError
+
+    @property
+    def name(self) -> str:
+        raise NotImplementedError
+
     @staticmethod
     def _filter_id_or_name(
         values: list[ValueType], id_or_name: IdType | str
