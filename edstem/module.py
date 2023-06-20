@@ -105,19 +105,11 @@ class Module(base.EdObject[base.ModuleID]):
         lessons = self.get_lessons()
         return Module._filter_single_id_or_name(lessons, id_or_name)  # type: ignore
 
-    def _to_dict(self, changes_only=True) -> dict[str, Any]:
-        data: dict[str, Any]
-        if changes_only:
-            data = {k: self._data[k] for k in self._changes}
-        else:
-            data = self._data
-        return data
-
     def post_changes(self, ignore_errors: bool = False) -> bool:
         try:
             module_data = self._to_dict(changes_only=True)
             module_data = self._api.edit_module(self.course_id, self.id, module_data)
-            self.__dict__.update(module_data)
+            self._data.update(module_data)
             return True
         except Exception as e:
             if ignore_errors:

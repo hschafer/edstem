@@ -1,3 +1,5 @@
+import datetime
+
 import edstem
 
 DIVIDER = "=" * 20
@@ -31,6 +33,14 @@ def main():
     print("Example lesson", lesson)
     module = lesson.get_module()
     print("Example lesson's module", module)
+
+    # Example of editing lesson
+    print("Edit lesson example")
+    lesson = course.get_lesson(62178)
+    print("  Name before:", lesson.name)
+    lesson.name = "Test " + str(datetime.datetime.now())
+    lesson.post_changes()
+    print("  Name after :", lesson.name)
 
 
 if __name__ == "__main__":

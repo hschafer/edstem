@@ -54,6 +54,7 @@ def _proper_keys(
 
 
 class EdObject(Generic[IdType]):
+    _data: dict[str, Any]
     _changes: set[str]
     _api: EdStemAPI
 
@@ -105,6 +106,14 @@ class EdObject(Generic[IdType]):
         return result
 
     # TODO need to go back to Ed String format?
+
+    def _to_dict(self, changes_only=True) -> dict[str, Any]:
+        data: dict[str, Any]
+        if changes_only:
+            data = {k: self._data[k] for k in self._changes}
+        else:
+            data = self._data
+        return data
 
     # General functions
     def _tuple(self) -> tuple:

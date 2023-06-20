@@ -25,6 +25,15 @@ class LessonData(TypedDict):
     openable: bool  # Can the user open the assignment
 
 
+# Note: The implementation below is pretty complicated to achieve
+# two primary design goals
+# 1) Lessons on Ed have lots of settings groups, want this reflected in Python wrapper
+# 2) Want all edits to be done via properties that change the underlying dict that Ed understands
+# To achieve this, the settings objects need to be aware of their parent lesson to edit it
+# A "simpler" implementation would require storing a separate set of state and marshalling in/out
+# to Ed objects.
+
+
 class Lesson(base.EdObject[base.LessonID]):
     _data: dict[str, Any]
     _cached_created_at: datetime | None
@@ -413,6 +422,18 @@ class Lesson(base.EdObject[base.LessonID]):
             return None
         else:
             return Module.get_module(self.course_id, self.module_id)
+
+    def post_changes(self, ignore_errors: bool = False) -> bool:
+        try:
+            lesson_data = self._to_dict(changes_only=True)
+            new_lesson_data = self._api.edit_lesson(self.id, lesson_data)
+            self._data.update(new_lesson_data)
+            return True
+        except Exception as e:
+            if ignore_errors:
+                return False
+            else:
+                raise e
 
 
 from edstem.module import (
