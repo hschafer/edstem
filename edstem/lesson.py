@@ -5,6 +5,7 @@ from typing import Any, NotRequired, Optional, Sequence, TypedDict
 
 import edstem._base as base
 from edstem.ed_api import EdStemAPI
+from edstem.slide import Slide, SlideData
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,7 @@ class LessonData(TypedDict):
     creator_id: base.UserID
     created_at: datetime
     openable: bool  # Can the user open the assignment
+    slides: list[SlideData]
 
 
 # Note: The implementation below is pretty complicated to achieve
@@ -38,6 +40,7 @@ class Lesson(base.EdObject[base.LessonID]):
     _data: dict[str, Any]
     _cached_created_at: datetime | None
     _timezone: str | None
+    _slides: list[Slide]
 
     class VisibilitySettings:
         def __init__(self, lesson: "Lesson") -> None:
@@ -310,6 +313,11 @@ class Lesson(base.EdObject[base.LessonID]):
         self._schedule = Lesson.ScheduledSettings(self)
         self._quiz = Lesson.QuizSettings(self)
 
+        # Set up slides
+        self._slides = [
+            Slide.from_dict(slide_data) for slide_data in self._data["slides"]
+        ]
+
     @staticmethod
     def from_dict(data: base.JSON) -> "Lesson":
         return Lesson(data)
@@ -377,6 +385,13 @@ class Lesson(base.EdObject[base.LessonID]):
     def quiz_settings(self) -> QuizSettings:
         return self._quiz
 
+    @property
+    def slides(self) -> list[Slide]:
+        return self._slides
+
+    def get_slide(self, id_or_name: base.SlideID | str):
+        return base.EdObject._filter_single_id_or_name(self._slides, id_or_name)
+
     def _tuple(self) -> tuple:
         return (
             self.name,
@@ -407,6 +422,10 @@ class Lesson(base.EdObject[base.LessonID]):
             return Module.get_module(self.course_id, self.module_id)
 
     def post_changes(self):
+        # Have each slide post changes
+        for slide in self._slides:
+            slide.post_changes()
+
         lesson_data = self._to_dict(changes_only=True)
         new_lesson_data = self._api.edit_lesson(self.id, lesson_data)
         self._data.update(new_lesson_data)

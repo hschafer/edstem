@@ -143,3 +143,6 @@ class Slide(base.EdObject[base.SlideID]):
         slide_data = self._to_dict(changes_only=True)
         new_slide_data = self._api.edit_slide(self.id, slide_data)
         self._data.update(new_slide_data)
+
+    def delete(self) -> None:
+        self._api.delete_slide(self.id)
