@@ -116,14 +116,7 @@ class User(base.EdObject[base.UserID]):
         users = User.get_all_users(course_id)
         return base.EdObject._filter_single_id_or_name(users, id_or_name)
 
-    def post_changes(self, ignore_errors: bool = False) -> bool:
-        try:
-            user_data = self._to_dict(changes_only=True)
-            new_user_data = self._api.edit_user(self.id, user_data)
-            self._data.update(new_user_data)
-            return True
-        except Exception as e:
-            if ignore_errors:
-                return False
-            else:
-                raise e
+    def post_changes(self):
+        user_data = self._to_dict(changes_only=True)
+        new_user_data = self._api.edit_user(self.id, user_data)
+        self._data.update(new_user_data)

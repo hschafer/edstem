@@ -423,17 +423,10 @@ class Lesson(base.EdObject[base.LessonID]):
         else:
             return Module.get_module(self.course_id, self.module_id)
 
-    def post_changes(self, ignore_errors: bool = False) -> bool:
-        try:
-            lesson_data = self._to_dict(changes_only=True)
-            new_lesson_data = self._api.edit_lesson(self.id, lesson_data)
-            self._data.update(new_lesson_data)
-            return True
-        except Exception as e:
-            if ignore_errors:
-                return False
-            else:
-                raise e
+    def post_changes(self):
+        lesson_data = self._to_dict(changes_only=True)
+        new_lesson_data = self._api.edit_lesson(self.id, lesson_data)
+        self._data.update(new_lesson_data)
 
 
 from edstem.module import (
