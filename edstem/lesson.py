@@ -16,7 +16,7 @@ class Prerequisite:
 
 class LessonData(TypedDict):
     id: base.UserID
-    name: str
+    title: str
     lesson_number: int
     course_id: base.CourseID
     module_id: base.ModuleID | None
@@ -309,23 +309,6 @@ class Lesson(base.EdObject[base.LessonID]):
         self._access = Lesson.AccessSettings(self)
         self._schedule = Lesson.ScheduledSettings(self)
         self._quiz = Lesson.QuizSettings(self)
-
-    @staticmethod
-    def _pull_from_dict(
-        data: base.JSON, keys: list[str | tuple[str, str]]
-    ) -> base.JSON:
-        result = {}
-        for key in keys:
-            if type(key) is tuple:
-                old_key, target_key = key
-                result[target_key] = data[old_key]
-                del data[old_key]
-            else:
-                assert type(key) is str
-                result[key] = data[key]
-                del data[key]
-
-        return result
 
     @staticmethod
     def from_dict(data: base.JSON) -> "Lesson":
