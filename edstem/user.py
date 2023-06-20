@@ -11,7 +11,7 @@ class UserData(TypedDict):
     role: str
     tutorial: str | None
     accepted: bool
-    source_id: NotRequired[str]
+    sourced_id: NotRequired[str]
 
 
 class User(base.EdObject[base.UserID]):
@@ -25,7 +25,7 @@ class User(base.EdObject[base.UserID]):
         role: str,
         tutorial: Optional[str] = None,
         accepted: bool = False,
-        source_id: str = "",
+        sourced_id: str = "",
         **kwargs,
     ) -> None:
         # Currently left out: username, lab_id, lti_synced
@@ -37,7 +37,7 @@ class User(base.EdObject[base.UserID]):
             "role": role,
             "tutorial": tutorial,
             "accepted": accepted,
-            "source_id": source_id,
+            "sourced_id": sourced_id,
         }
 
     @staticmethod
@@ -87,8 +87,8 @@ class User(base.EdObject[base.UserID]):
         return self._data["accepted"]
 
     @property
-    def source_id(self) -> str:
-        return self._data["source_id"]
+    def sourced_id(self) -> str:
+        return self._data["sourced_id"]
 
     def _tuple(self) -> tuple:
         return (
@@ -98,7 +98,7 @@ class User(base.EdObject[base.UserID]):
             self.role,
             self.tutorial,
             self.accepted,
-            self.source_id,
+            self.sourced_id,
         )
 
     def __repr__(self) -> str:
@@ -115,3 +115,15 @@ class User(base.EdObject[base.UserID]):
     def get_user(course_id: base.CourseID, id_or_name: base.UserID | str) -> "User":
         users = User.get_all_users(course_id)
         return base.EdObject._filter_single_id_or_name(users, id_or_name)
+
+    def post_changes(self, ignore_errors: bool = False) -> bool:
+        try:
+            user_data = self._to_dict(changes_only=True)
+            new_user_data = self._api.edit_user(self.id, user_data)
+            self._data.update(new_user_data)
+            return True
+        except Exception as e:
+            if ignore_errors:
+                return False
+            else:
+                raise e

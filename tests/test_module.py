@@ -114,7 +114,4 @@ class ModuleTest(BaseTest):
         # Post changes and inspect response
         module.post_changes()
         current_data = module._to_dict(changes_only=False)
-
-        print(expected_data)
-        print(current_data)
         self.assertEqual(expected_data, current_data)

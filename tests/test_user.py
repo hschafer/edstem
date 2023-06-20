@@ -1,52 +1,12 @@
+import copy
+
+import responses
 from testing_utils import *
 
 from edstem.user import User
 
 
 class UserTest(BaseTest):
-    # TODO test from_dict
-    # def test_from_dict(self):
-    #    user = User.from_dict(TEST_USER_0_JSON)
-    #    self.assertEqual("Example Assignment", user.get_name())
-    #    self.assertEqual(60007, user.get_id())
-    #    self.assertEqual(38139, user.get_course_id())
-    #    self.assertEqual(369, user.get_creator_id())
-    #    self.assertEqual(False, user.get_openable())
-
-    #    visibility = user.get_visibility_settings()
-    #    self.assertEqual(True, visibility.hidden)
-    #    self.assertEqual(False, visibility.unlisted)
-
-    #    access = user.get_access_settings()
-    #    self.assertEqual(None, access.password)
-    #    self.assertEqual(None, access.tutorial_regex)
-    #    self.assertEqual(None, access.timer)
-    #    self.assertEqual([], access.prerequisites)
-
-    #    scheduled = user.get_scheduled_settings()
-    #    timezone = tz.gettz("America/Los_Angeles")
-    #    self.assertEqual(
-    #        datetime(2023, 5, 17, 15, 0, 0, 0, tzinfo=timezone), scheduled.available_at
-    #    )
-    #    self.assertEqual(
-    #        datetime(2023, 5, 18, 15, 0, 0, 0, tzinfo=timezone), scheduled.due_at
-    #    )
-    #    self.assertEqual(
-    #        datetime(2023, 5, 18, 15, 0, 0, 0, tzinfo=timezone), scheduled.locked_at
-    #    )
-    #    self.assertEqual(
-    #        datetime(2023, 5, 18, 15, 0, 0, 0, tzinfo=timezone), scheduled.solutions_at
-    #    )
-
-    #    self.assertEqual(True, scheduled.late_submissions)
-    #    self.assertEqual(False, scheduled.after_solution_submissions)
-    #    self.assertEqual(False, scheduled.release_challenge_feedback)
-    #    self.assertEqual(False, scheduled.release_challenge_solutions)
-    #    self.assertEqual(False, scheduled.release_quiz_solutions)
-    #    self.assertEqual(False, scheduled.release_quiz_correctness_only)
-
-    #    # Low prio, but need to test quiz settings too
-
     def test_get_all_users(self):
         users = User.get_all_users(TEST_COURSE_ID)
         print(users)
@@ -70,3 +30,35 @@ class UserTest(BaseTest):
         # ID not found
         with self.assertRaises(ValueError):
             User.get_user(TEST_COURSE_ID, 3)
+
+    @responses.activate
+    def test_user_edit(self):
+        # Stop other API patches
+        self._stop_api_patch()
+        edstem.auth.set_token("Fake Token")
+
+        test_user_id = 555
+
+        # Patch the specific request methods instead to check their inputs/outputs
+        expected_data = TEST_USER_SABRINA_JSON | {"name": "Sabrina New"}
+        get_response = responses.Response(
+            method="GET",
+            url=f"https://us.edstem.org/api/courses/{TEST_COURSE_ID}/admin",
+            json={"users": copy.deepcopy(TEST_USER_JSON)},
+        )
+        patch_response = responses.Response(
+            method="PATCH",
+            url=f"https://us.edstem.org/api/users/{test_user_id}",
+            json={"user": expected_data},
+        )
+        responses.add(get_response)
+        responses.add(patch_response)
+
+        user = User.get_user(TEST_COURSE_ID, test_user_id)
+        user.name = "Sabrina New"
+        user.post_changes()
+
+        current_data = user._to_dict(changes_only=False)
+        print(current_data)
+        print(expected_data)
+        self.assertEqual(expected_data, current_data)

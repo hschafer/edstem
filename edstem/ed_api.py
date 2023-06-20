@@ -13,6 +13,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 import requests
+from requests import Response
 
 from edstem.auth import get_token
 
@@ -127,6 +128,36 @@ class EdStemAPI:
         response.raise_for_status()
         return response.content
 
+    def _patch_request(
+        self,
+        url: str,
+        query_params: Dict[str, Any] = {},
+        json: Dict[str, Any] = {},
+        data: Dict[str, Any] = {},
+    ) -> Response:
+        """Sends a PATCH request to EdStem.
+
+        Args:
+            url: URL endpoint to hit
+            query_params: A dictionary of query parameters and values
+            json: A dictionary of parameters and values to pass as the payload
+
+        Returns:
+            A binary string containing response content
+
+        Raises:
+            HTTPError: If there was an error with the HTTP request
+        """
+        response = requests.patch(
+            url,
+            params=query_params,
+            json=json,
+            data=data,
+            headers={"Authorization": "Bearer " + self._token},
+        )
+        response.raise_for_status()
+        return response
+
     def _delete_request(
         self,
         url: str,
@@ -162,6 +193,12 @@ class EdStemAPI:
         admin_path = urljoin(EdStemAPI.API_URL, f"courses/{course_id}/admin")
         admin_info = self._get_request(admin_path)
         return admin_info["users"]
+
+    # Edit user
+    def edit_user(self, user_id: int, data: dict[str, Any]) -> dict[str, Any]:
+        user_path = urljoin(EdStemAPI.API_URL, f"users", user_id)
+        user_dict = {"user": data}
+        return self._patch_request(user_path, json=user_dict).json()["user"]
 
     # Get lesson info
     def get_all_lessons(self, course_id: int) -> list[dict[str, Any]]:
