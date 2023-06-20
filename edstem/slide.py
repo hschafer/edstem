@@ -4,6 +4,7 @@ from typing import Any, NotRequired, Optional, TypedDict
 
 import edstem._base as base
 from edstem.ed_api import EdStemAPI
+from edstem.quiz_question import QuizQuestion
 
 
 class SlideData(TypedDict):
@@ -138,6 +139,13 @@ class Slide(base.EdObject[base.SlideID]):
     def slide(slide_id: base.SlideID) -> "Slide":
         api = EdStemAPI()
         return Slide.from_dict(api.get_slide(slide_id))
+
+    def get_questions(self) -> list[QuizQuestion]:
+        assert self.type == "quiz"
+        return [
+            QuizQuestion.from_dict(question)
+            for question in self._api.get_slide_questions(self.id)
+        ]
 
     def post_changes(self):
         slide_data = self._to_dict(changes_only=True)
