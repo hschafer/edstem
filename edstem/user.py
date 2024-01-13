@@ -62,7 +62,7 @@ class User(base.EdObject[base.UserID]):
 
     @property
     def email(self) -> str:
-        return self._data["name"]
+        return self._data["email"]
 
     @property
     def role(self) -> str:
